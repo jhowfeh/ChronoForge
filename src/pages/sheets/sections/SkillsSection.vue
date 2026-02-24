@@ -175,8 +175,9 @@ function setSpec(skillKey, v) {
                 )
               </span>
 
-              <span v-if="r.trainedOnly" class="star">*</span>
-              <span v-if="r.armorPenalty" class="star">**</span>
+              
+              <i v-if="r.armorPenalty"class="fa-solid fa-shield star"></i>
+              <i v-if="r.trainedOnly" class="fa-solid fa-book star"></i>
             </div>
 
             <!-- Total -->
@@ -253,8 +254,8 @@ function setSpec(skillKey, v) {
 
         <!-- Debug útil (remove depois) -->
         <div class="skills-foot">
-          <div>* Somente treinado.</div>
-          <div>** Penalidade de armadura.</div>
+          <div><i class="fa-solid fa-book"></i> Somente treinado.</div>
+          <div><i class="fa-solid fa-shield"></i> Penalidade de armadura.</div>
           <div class="lvl">Nível (ctx): {{ ctx.level }} | Grad.: {{ Math.floor((Number(ctx.level)||1)/2) }}</div>
         </div>
       </div>

@@ -5,7 +5,7 @@
 export const origins = [
   {
     label: "Acólito",
-    value: "acolito",
+    id: "acolito",
     proficiencies: ["Armas simples", "Armaduras leves"],
     trainedSkills: ["cura", "religiao", "vontade"],
     startingEquipment: [
@@ -21,7 +21,7 @@ export const origins = [
 
   {
     label: "Amigo dos Animais",
-    value: "amigo_dos_animais",
+    id: "amigo_dos_animais",
     proficiencies: [],
     trainedSkills: ["adestramento", "cavalgar"],
     startingEquipment: [
@@ -32,7 +32,7 @@ export const origins = [
 
   {
     label: "Amnésico",
-    value: "amnesico",
+    id: "amnesico",
     proficiencies: [],
     trainedSkills: [],
     startingEquipment: [
@@ -45,7 +45,7 @@ export const origins = [
 
   {
     label: "Aristocrata",
-    value: "aristocrata",
+    id: "aristocrata",
     proficiencies: [],
     trainedSkills: ["diplomacia", "enganacao", "nobreza"],
     startingEquipment: [
@@ -57,7 +57,7 @@ export const origins = [
 
   {
     label: "Artesão",
-    value: "artesao",
+    id: "artesao",
     proficiencies: [],
     trainedSkills: ["oficio", "vontade"],
     startingEquipment: [
@@ -69,7 +69,7 @@ export const origins = [
 
   {
     label: "Artista",
-    value: "artista",
+    id: "artista",
     proficiencies: [],
     trainedSkills: ["atuacao", "enganacao"],
     startingEquipment: [
@@ -80,7 +80,7 @@ export const origins = [
 
   {
     label: "Assistente de Laboratório",
-    value: "assistente_de_laboratorio",
+    id: "assistente_de_laboratorio",
     proficiencies: [],
     trainedSkills: ["oficio_alquimista", "misticismo"],
     startingEquipment: [
@@ -91,7 +91,7 @@ export const origins = [
 
   {
     label: "Batedor",
-    value: "batedor",
+    id: "batedor",
     proficiencies: [],
     trainedSkills: ["furtividade", "percepcao", "sobrevivencia"],
     startingEquipment: [
@@ -104,7 +104,7 @@ export const origins = [
 
   {
     label: "Capanga",
-    value: "capanga",
+    id: "capanga",
     proficiencies: [],
     trainedSkills: ["luta", "intimidacao"],
     startingEquipment: [
@@ -116,7 +116,7 @@ export const origins = [
 
   {
     label: "Charlatão",
-    value: "charlatao",
+    id: "charlatao",
     proficiencies: [],
     trainedSkills: ["enganacao", "jogatina"],
     startingEquipment: [
@@ -128,7 +128,7 @@ export const origins = [
 
   {
     label: "Circense",
-    value: "circense",
+    id: "circense",
     proficiencies: [],
     trainedSkills: ["acrobacia", "atuacao", "reflexos"],
     startingEquipment: [{ id: "bolas_malabarismo", name: "Três bolas coloridas para malabarismo (+1 em Atuação)" }],
@@ -137,7 +137,7 @@ export const origins = [
 
   {
     label: "Criminoso",
-    value: "criminoso",
+    id: "criminoso",
     proficiencies: [],
     trainedSkills: ["enganacao", "furtividade", "ladinagem"],
     startingEquipment: [{ id: "disfarces_ou_gazua", name: "Estojo de disfarces ou gazua" }],
@@ -146,7 +146,7 @@ export const origins = [
 
   {
     label: "Curandeiro",
-    value: "curandeiro",
+    id: "curandeiro",
     proficiencies: [],
     trainedSkills: ["cura", "vontade"],
     startingEquipment: [
@@ -158,7 +158,7 @@ export const origins = [
 
   {
     label: "Eremita",
-    value: "eremita",
+    id: "eremita",
     proficiencies: [],
     trainedSkills: ["misticismo", "religiao", "sobrevivencia"],
     startingEquipment: [
@@ -170,7 +170,7 @@ export const origins = [
 
   {
     label: "Escravo",
-    value: "escravo",
+    id: "escravo",
     proficiencies: [],
     trainedSkills: ["atletismo", "fortitude", "furtividade"],
     startingEquipment: [
@@ -182,7 +182,7 @@ export const origins = [
 
   {
     label: "Estudioso",
-    value: "estudioso",
+    id: "estudioso",
     proficiencies: [],
     trainedSkills: ["conhecimento", "guerra", "misticismo"],
     startingEquipment: [
@@ -193,7 +193,7 @@ export const origins = [
 
   {
     label: "Fazendeiro",
-    value: "fazendeiro",
+    id: "fazendeiro",
     proficiencies: [],
     trainedSkills: ["adestramento", "cavalgar", "oficio", "sobrevivencia"],
     startingEquipment: [
@@ -207,7 +207,7 @@ export const origins = [
 
   {
     label: "Forasteiro",
-    value: "forasteiro",
+    id: "forasteiro",
     proficiencies: [],
     trainedSkills: ["cavalgar", "pilotagem", "sobrevivencia"],
     startingEquipment: [
@@ -220,7 +220,7 @@ export const origins = [
 
   {
     label: "Gladiador",
-    value: "gladiador",
+    id: "gladiador",
     proficiencies: [],
     trainedSkills: ["atuacao", "luta"],
     startingEquipment: [
@@ -232,7 +232,7 @@ export const origins = [
 
   {
     label: "Guarda",
-    value: "guarda",
+    id: "guarda",
     proficiencies: [],
     trainedSkills: ["investigacao", "luta", "percepcao"],
     startingEquipment: [
@@ -245,7 +245,7 @@ export const origins = [
 
   {
     label: "Herdeiro",
-    value: "herdeiro",
+    id: "herdeiro",
     proficiencies: [],
     trainedSkills: ["misticismo", "nobreza", "oficio"],
     startingEquipment: [{ id: "simbolo_heranca", name: "Símbolo de herança (anel de sinete, manto cerimonial etc.)" }],
@@ -254,7 +254,7 @@ export const origins = [
 
   {
     label: "Herói Camponês",
-    value: "heroi_campones",
+    id: "heroi_campones",
     proficiencies: [],
     trainedSkills: ["adestramento", "oficio"],
     startingEquipment: [
@@ -266,7 +266,7 @@ export const origins = [
 
   {
     label: "Marujo",
-    value: "marujo",
+    id: "marujo",
     proficiencies: [],
     trainedSkills: ["atletismo", "jogatina", "pilotagem"],
     startingEquipment: [
@@ -278,7 +278,7 @@ export const origins = [
 
   {
     label: "Mateiro",
-    value: "mateiro",
+    id: "mateiro",
     proficiencies: [],
     trainedSkills: ["atletismo", "furtividade", "sobrevivencia"],
     startingEquipment: [
@@ -292,7 +292,7 @@ export const origins = [
 
   {
     label: "Membro de Guilda",
-    value: "membro_de_guilda",
+    id: "membro_de_guilda",
     proficiencies: [],
     trainedSkills: ["diplomacia", "enganacao", "misticismo", "oficio"],
     startingEquipment: [{ id: "gazua_ou_instrumentos", name: "Gazua ou instrumentos de ofício" }],
@@ -301,7 +301,7 @@ export const origins = [
 
   {
     label: "Mercador",
-    value: "mercador",
+    id: "mercador",
     proficiencies: [],
     trainedSkills: ["diplomacia", "intuicao", "oficio"],
     startingEquipment: [
@@ -314,7 +314,7 @@ export const origins = [
 
   {
     label: "Minerador",
-    value: "minerador",
+    id: "minerador",
     proficiencies: [],
     trainedSkills: ["atletismo", "fortitude", "oficio_minerador"],
     startingEquipment: [
@@ -326,7 +326,7 @@ export const origins = [
 
   {
     label: "Nômade",
-    value: "nomade",
+    id: "nomade",
     proficiencies: [],
     trainedSkills: ["cavalgar", "pilotagem", "sobrevivencia"],
     startingEquipment: [
@@ -338,7 +338,7 @@ export const origins = [
 
   {
     label: "Pivete",
-    value: "pivete",
+    id: "pivete",
     proficiencies: [],
     trainedSkills: ["furtividade", "iniciativa", "ladinagem"],
     startingEquipment: [
@@ -351,7 +351,7 @@ export const origins = [
 
   {
     label: "Refugiado",
-    value: "refugiado",
+    id: "refugiado",
     proficiencies: [],
     trainedSkills: ["fortitude", "reflexos", "vontade"],
     startingEquipment: [{ id: "item_estrangeiro_100", name: "Um item estrangeiro de até T$ 100" }],
@@ -360,7 +360,7 @@ export const origins = [
 
   {
     label: "Seguidor",
-    value: "seguidor",
+    id: "seguidor",
     proficiencies: [],
     trainedSkills: ["adestramento", "oficio"],
     startingEquipment: [{ id: "item_mestre_100", name: "Um item recebido de seu mestre de até T$ 100" }],
@@ -369,7 +369,7 @@ export const origins = [
 
   {
     label: "Selvagem",
-    value: "selvagem",
+    id: "selvagem",
     proficiencies: [],
     trainedSkills: ["percepcao", "reflexos", "sobrevivencia"],
     startingEquipment: [
@@ -381,7 +381,7 @@ export const origins = [
 
   {
     label: "Soldado",
-    value: "soldado",
+    id: "soldado",
     proficiencies: [],
     trainedSkills: ["fortitude", "guerra", "luta", "pontaria"],
     startingEquipment: [
@@ -394,7 +394,7 @@ export const origins = [
 
   {
     label: "Taverneiro",
-    value: "taverneiro",
+    id: "taverneiro",
     proficiencies: [],
     trainedSkills: ["diplomacia", "jogatina", "oficio_cozinheiro"],
     startingEquipment: [
@@ -409,7 +409,7 @@ export const origins = [
 
   {
     label: "Trabalhador",
-    value: "trabalhador",
+    id: "trabalhador",
     proficiencies: [],
     trainedSkills: ["atletismo", "fortitude"],
     startingEquipment: [{ id: "ferramenta_pesada_escolha", name: "Uma ferramenta pesada (como maça ou lança — escolha)" }],

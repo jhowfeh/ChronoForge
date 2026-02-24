@@ -11,6 +11,9 @@ import { deities } from './data/deities.list'
 import { racialFeatures } from './data/races.features'
 import { races } from './data/races.list'
 
+import { classesFeatures } from './data/classes.features'
+import { classes } from './data/classes.list'
+
 // src/rulesets/t20/catalog.js
 export function buildT20Catalog() {
   const features = [
@@ -19,13 +22,15 @@ export function buildT20Catalog() {
     ...generalMagicFeatures,
     ...originFeatures,
     ...divineFeatures,
-    ...racialFeatures
+    ...racialFeatures,
+    ...classesFeatures
   ]
 
   const featureIndex = new Map(features.map(f => [f.id, f]))
-  const originIndex  = new Map((origins || []).map(o => [o.value, o]))
-  const deityIndex   = new Map((deities || []).map(d => [d.value, d]))
-  const raceIndex    = new Map((races || []).map(r => [r.value, r]))
+  const originIndex  = new Map((origins || []).map(o => [o.id, o]))
+  const deityIndex   = new Map((deities || []).map(d => [d.id, d]))
+  const raceIndex    = new Map((races || []).map(r => [r.id, r]))
+  const classIndex   = new Map((classes || []).map(c => [c.id, c]))
 
   const catalog = {
     id: 't20',
@@ -36,12 +41,14 @@ export function buildT20Catalog() {
     origins: origins || [],
     deities: deities || [],
     races: races || [],
+    classes: classes || [],
 
     // índices
     featureIndex,
     originIndex,
     deityIndex,
     raceIndex,
+    classIndex,
 
     // ✅ interface genérica pro UI (HeaderSection, etc.)
     // sempre retorna Array
@@ -49,6 +56,7 @@ export function buildT20Catalog() {
       if (source === 'origins') return Array.isArray(this.origins) ? this.origins : []
       if (source === 'deities') return Array.isArray(this.deities) ? this.deities : []
       if (source === 'races')   return Array.isArray(this.races) ? this.races : []
+      if (source === 'classes')  return Array.isArray(this.classes) ? this.classes : []
       return []
     },
 
@@ -60,6 +68,7 @@ export function buildT20Catalog() {
       if (kind === 'origin')  return this.originIndex?.get(id) || null
       if (kind === 'deity')   return this.deityIndex?.get(id) || null
       if (kind === 'race')    return this.raceIndex?.get(id) || null
+      if (kind === 'class')   return this.classIndex?.get(id) || null
       return null
     },
 
@@ -67,7 +76,8 @@ export function buildT20Catalog() {
     getFeature: (id) => featureIndex.get(id) || null,
     getOrigin:  (id) => originIndex.get(id) || null,
     getDeity:   (id) => deityIndex.get(id) || null,
-    getRace:    (id) => raceIndex.get(id) || null
+    getRace:    (id) => raceIndex.get(id) || null,
+    getClass:   (id) => classIndex.get(id) || null
   }
 
   return catalog

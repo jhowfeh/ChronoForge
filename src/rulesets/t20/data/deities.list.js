@@ -3,7 +3,7 @@
 export const deities = [
   {
     label: 'Aharadak',
-    value: 'aharadak',
+    id: 'aharadak',
     channelEnergy: 'negative',
     favoredWeapon: 'Corrente de espinhos',
     holySymbol: 'Um olho macabro de pupila vertical e cercado de espinhos.',
@@ -21,7 +21,7 @@ export const deities = [
 
   {
     label: 'Allihanna',
-    value: 'allihanna',
+    id: 'allihanna',
     channelEnergy: 'positive',
     favoredWeapon: 'Bordão',
     holySymbol:
@@ -40,7 +40,7 @@ export const deities = [
 
   {
     label: 'Arsenal',
-    value: 'arsenal',
+    id: 'arsenal',
     channelEnergy: 'any',
     favoredWeapon: 'Martelo de guerra',
     holySymbol: 'Um martelo de guerra e uma espada longa cruzados sobre um escudo.',
@@ -58,7 +58,7 @@ export const deities = [
 
   {
     label: 'Azgher',
-    value: 'azgher',
+    id: 'azgher',
     channelEnergy: 'positive',
     favoredWeapon: 'Cimitarra',
     holySymbol: 'Um sol dourado.',
@@ -76,7 +76,7 @@ export const deities = [
 
   {
     label: 'Hyninn',
-    value: 'hyninn',
+    id: 'hyninn',
     channelEnergy: 'any',
     favoredWeapon: 'Adaga',
     holySymbol: 'Uma adaga atravessando uma máscara, ou uma raposa.',
@@ -94,7 +94,7 @@ export const deities = [
 
   {
     label: 'Kallyadranoch',
-    value: 'kallyadranoch',
+    id: 'kallyadranoch',
     channelEnergy: 'negative',
     favoredWeapon: 'Lança',
     holySymbol: 'Escamas de cinco cores diferentes.',
@@ -112,7 +112,7 @@ export const deities = [
 
   {
     label: 'Khalmyr',
-    value: 'khalmyr',
+    id: 'khalmyr',
     channelEnergy: 'positive',
     favoredWeapon: 'Espada longa',
     holySymbol: 'Espada sobreposta a uma balança.',
@@ -130,7 +130,7 @@ export const deities = [
 
   {
     label: 'Lena',
-    value: 'lena',
+    id: 'lena',
     channelEnergy: 'positive',
     favoredWeapon: 'Nenhuma',
     holySymbol: 'Lua crescente prateada.',
@@ -148,7 +148,7 @@ export const deities = [
 
   {
     label: 'Lin-Wu',
-    value: 'linwu',
+    id: 'linwu',
     channelEnergy: 'any',
     favoredWeapon: 'Katana',
     holySymbol: 'Placa de metal com a silhueta de um dragão-serpente celestial.',
@@ -166,7 +166,7 @@ export const deities = [
 
   {
     label: 'Marah',
-    value: 'marah',
+    id: 'marah',
     channelEnergy: 'positive',
     favoredWeapon: 'Nenhuma',
     holySymbol: 'Um coração vermelho.',
@@ -184,7 +184,7 @@ export const deities = [
 
   {
     label: 'Megalokk',
-    value: 'megalokk',
+    id: 'megalokk',
     channelEnergy: 'negative',
     favoredWeapon: 'Maça',
     holySymbol: 'A garra de um monstro.',
@@ -202,7 +202,7 @@ export const deities = [
 
   {
     label: 'Nimb',
-    value: 'nimb',
+    id: 'nimb',
     channelEnergy: 'any',
     favoredWeapon: 'Nenhuma e todas',
     holySymbol: 'Um dado de seis faces.',
@@ -220,7 +220,7 @@ export const deities = [
 
   {
     label: 'Oceano',
-    value: 'oceano',
+    id: 'oceano',
     channelEnergy: 'any',
     favoredWeapon: 'Tridente',
     holySymbol: 'Uma concha.',
@@ -238,7 +238,7 @@ export const deities = [
 
   {
     label: 'Sszzaas',
-    value: 'sszzaas',
+    id: 'sszzaas',
     channelEnergy: 'negative',
     favoredWeapon: 'Adaga',
     holySymbol: 'Uma naja vertendo veneno pelas presas.',
@@ -256,7 +256,7 @@ export const deities = [
 
   {
     label: 'Tanna-Toh',
-    value: 'tanna_toh',
+    id: 'tanna_toh',
     channelEnergy: 'any',
     favoredWeapon: 'Bordão',
     holySymbol: 'Pergaminho e pena.',
@@ -274,7 +274,7 @@ export const deities = [
 
   {
     label: 'Tenebra',
-    value: 'tenebra',
+    id: 'tenebra',
     channelEnergy: 'negative',
     favoredWeapon: 'Adaga',
     holySymbol: 'Estrela negra de cinco pontas.',
@@ -292,7 +292,7 @@ export const deities = [
 
   {
     label: 'Thwor',
-    value: 'thwor',
+    id: 'thwor',
     channelEnergy: 'any',
     favoredWeapon: 'Machado de guerra',
     holySymbol: 'Um grande punho fechado.',
@@ -310,7 +310,7 @@ export const deities = [
 
   {
     label: 'Thyatis',
-    value: 'thyatis',
+    id: 'thyatis',
     channelEnergy: 'positive',
     favoredWeapon: 'Espada longa',
     holySymbol: 'Uma ave fênix.',
@@ -328,7 +328,7 @@ export const deities = [
 
   {
     label: 'Valkaria',
-    value: 'valkaria',
+    id: 'valkaria',
     channelEnergy: 'positive',
     favoredWeapon: 'Mangual',
     holySymbol: 'A Estátua de Valkaria ou seis faixas entrelaçadas.',
@@ -346,7 +346,7 @@ export const deities = [
 
   {
     label: 'Wynna',
-    value: 'wynna',
+    id: 'wynna',
     channelEnergy: 'any',
     favoredWeapon: 'Adaga',
     holySymbol: 'Um anel metálico.',
