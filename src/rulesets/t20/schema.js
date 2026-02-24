@@ -1,28 +1,45 @@
+// src/rulesets/t20/schema.js
+
 export const t20Schema = {
   id: 't20',
   label: 'Tormenta 20 (Jogo do Ano)',
 
-  headerFields: [    
-    { key: 'race',      label: 'RAÇA',            type: 'select',   span: 3,  source: 'races' },
-    { key: 'origin',    label: 'ORIGEM',          type: 'select',   span: 3,  source: 'origins' },
-    { key: 'class',     label: 'CLASSE',          type: 'select',   span: 3,  source: 'classes' },
-    { key: 'deity',     label: 'DIVINDADE',       type: 'select',   span: 3,  source: 'deities' },
-    { key: 'age',       label: 'IDADE',           type: 'number',   span: 2,},
-    { key: 'size',      label: 'TAMANHO',         type: 'text',     span: 2,},
-    { key: 'speed',     label: 'DESLOCAMENTO',    type: 'text',     span: 2,}
-  ],
+  /**
+   * =========================
+   * DEFAULTS DO SISTEMA
+   * =========================
+   * Usado por createEmptyCharacter:
+   * - attributeBase: valor inicial de cada atributo na criação
+   * - attributeMethod: como os atributos foram gerados (info para UI)
+   */
+  defaults: {
+    attributeBase: 0,          // T20 JdA: atributo é bônus direto (começa em 0)
+    attributeMethod: 'manual'  // 'manual' | 'pointBuy' | 'array' | 'roll'
+  },
 
+  /**
+   * Campos do cabeçalho (sua UI dinâmica)
+   */
+  headerFields: [
+    { key: 'race',   label: 'RAÇA',         type: 'select', span: 3, source: 'races' },
+    { key: 'origin', label: 'ORIGEM',       type: 'select', span: 3, source: 'origins' },
+    { key: 'class',  label: 'CLASSE',       type: 'select', span: 3, source: 'classes' },
+    { key: 'deity',  label: 'DIVINDADE',    type: 'select', span: 3, source: 'deities' },
+    { key: 'age',    label: 'IDADE',        type: 'number', span: 2 },
+    { key: 'size',   label: 'TAMANHO',      type: 'text',   span: 2 },
+    { key: 'speed',  label: 'DESLOCAMENTO', type: 'text',   span: 2 }
+  ],
 
   // =========================
   // ATRIBUTOS (JdA: valor já é o bônus)
   // =========================
   attributes: [
-    { key: 'str', acronym: 'FOR', label: 'Força',  },
-    { key: 'dex', acronym: 'DES', label: 'Destreza',   },
-    { key: 'con', acronym: 'CON', label: 'Constituição',   },
-    { key: 'int', acronym: 'INT', label: 'Inteligência',   },
-    { key: 'wis', acronym: 'SAB', label: 'Sabedoria',  },
-    { key: 'cha', acronym: 'CAR', label: 'Carisma',  }
+    { key: 'str', acronym: 'FOR', label: 'Força' },
+    { key: 'dex', acronym: 'DES', label: 'Destreza' },
+    { key: 'con', acronym: 'CON', label: 'Constituição' },
+    { key: 'int', acronym: 'INT', label: 'Inteligência' },
+    { key: 'wis', acronym: 'SAB', label: 'Sabedoria' },
+    { key: 'cha', acronym: 'CAR', label: 'Carisma' }
   ],
 
   // =========================
@@ -38,59 +55,56 @@ export const t20Schema = {
   ],
 
   // =========================
-  // GRUPOS / ALIASES (para engine aplicar bônus genéricos)
+  // GRUPOS / ALIASES
   // =========================
   skillGroups: {
-    // “testes de resistência” = Fortitude/Reflexos/Vontade (perícias)
     saves: ['fortitude', 'reflexes', 'will']
   },
 
   // =========================
   // PERÍCIAS
-  // - trainedOnly conforme sua lista
-  // - armorPenalty conforme sua lista
   // =========================
   skills: [
-    { key: 'acrobatics',      label: 'Acrobacia',       baseAttr: 'dex', armorPenalty: true },
-    { key: 'animal_handling', label: 'Adestramento',    baseAttr: 'cha', trainedOnly: true },
-    { key: 'athletics',       label: 'Atletismo',       baseAttr: 'str' },
-    { key: 'performance',     label: 'Atuação',         baseAttr: 'cha', trainedOnly: true },
-    { key: 'riding',          label: 'Cavalgar',        baseAttr: 'dex' },
-    { key: 'knowledge',       label: 'Conhecimento',    baseAttr: 'int', trainedOnly: true },
-    { key: 'healing',         label: 'Cura',            baseAttr: 'wis' },
-    { key: 'diplomacy',       label: 'Diplomacia',      baseAttr: 'cha' },
-    { key: 'deception',       label: 'Enganação',       baseAttr: 'cha' },
+    { key: 'acrobatics',      label: 'Acrobacia',     baseAttr: 'dex', armorPenalty: true },
+    { key: 'animal_handling', label: 'Adestramento',  baseAttr: 'cha', trainedOnly: true },
+    { key: 'athletics',       label: 'Atletismo',     baseAttr: 'str' },
+    { key: 'performance',     label: 'Atuação',       baseAttr: 'cha', trainedOnly: true },
+    { key: 'riding',          label: 'Cavalgar',      baseAttr: 'dex' },
+    { key: 'knowledge',       label: 'Conhecimento',  baseAttr: 'int', trainedOnly: true },
+    { key: 'healing',         label: 'Cura',          baseAttr: 'wis' },
+    { key: 'diplomacy',       label: 'Diplomacia',    baseAttr: 'cha' },
+    { key: 'deception',       label: 'Enganação',     baseAttr: 'cha' },
 
     // Resistências (perícias)
-    { key: 'fortitude',       label: 'Fortitude',       baseAttr: 'con', tags: ['save'] },
+    { key: 'fortitude',       label: 'Fortitude',     baseAttr: 'con', tags: ['save'] },
 
-    { key: 'stealth',         label: 'Furtividade',     baseAttr: 'dex', armorPenalty: true },
-    { key: 'warfare',         label: 'Guerra',          baseAttr: 'int', trainedOnly: true },
-    { key: 'initiative',      label: 'Iniciativa',      baseAttr: 'dex' },
-    { key: 'intimidation',    label: 'Intimidação',     baseAttr: 'cha' },
-    { key: 'insight',         label: 'Intuição',        baseAttr: 'wis' },
-    { key: 'investigation',   label: 'Investigação',    baseAttr: 'int' },
-    { key: 'gambling',        label: 'Jogatina',        baseAttr: 'cha', trainedOnly: true },
+    { key: 'stealth',         label: 'Furtividade',   baseAttr: 'dex', armorPenalty: true },
+    { key: 'warfare',         label: 'Guerra',        baseAttr: 'int', trainedOnly: true },
+    { key: 'initiative',      label: 'Iniciativa',    baseAttr: 'dex' },
+    { key: 'intimidation',    label: 'Intimidação',   baseAttr: 'cha' },
+    { key: 'insight',         label: 'Intuição',      baseAttr: 'wis' },
+    { key: 'investigation',   label: 'Investigação',  baseAttr: 'int' },
+    { key: 'gambling',        label: 'Jogatina',      baseAttr: 'cha', trainedOnly: true },
 
-    { key: 'sleight_of_hand', label: 'Ladinagem',       baseAttr: 'dex', trainedOnly: true, armorPenalty: true },
+    { key: 'sleight_of_hand', label: 'Ladinagem',     baseAttr: 'dex', trainedOnly: true, armorPenalty: true },
 
-    { key: 'melee',           label: 'Luta',            baseAttr: 'str' },
-    { key: 'mysticism',       label: 'Misticismo',      baseAttr: 'int', trainedOnly: true },
-    { key: 'nobility',        label: 'Nobreza',         baseAttr: 'int', trainedOnly: true },
+    { key: 'melee',           label: 'Luta',          baseAttr: 'str' },
+    { key: 'mysticism',       label: 'Misticismo',    baseAttr: 'int', trainedOnly: true },
+    { key: 'nobility',        label: 'Nobreza',       baseAttr: 'int', trainedOnly: true },
 
     // “Ofício” é especialização
-    { key: 'craft',           label: 'Ofício',          baseAttr: 'int', trainedOnly: true, isSpecialization: true },
+    { key: 'craft',           label: 'Ofício',        baseAttr: 'int', trainedOnly: true, isSpecialization: true },
 
-    { key: 'perception',      label: 'Percepção',       baseAttr: 'wis' },
-    { key: 'piloting',        label: 'Pilotagem',       baseAttr: 'dex', trainedOnly: true },
-    { key: 'ranged',          label: 'Pontaria',        baseAttr: 'dex' },
+    { key: 'perception',      label: 'Percepção',     baseAttr: 'wis' },
+    { key: 'piloting',        label: 'Pilotagem',     baseAttr: 'dex', trainedOnly: true },
+    { key: 'ranged',          label: 'Pontaria',      baseAttr: 'dex' },
 
-    { key: 'reflexes',        label: 'Reflexos',        baseAttr: 'dex', tags: ['save'] },
+    { key: 'reflexes',        label: 'Reflexos',      baseAttr: 'dex', tags: ['save'] },
 
-    { key: 'religion',        label: 'Religião',        baseAttr: 'wis', trainedOnly: true },
-    { key: 'survival',        label: 'Sobrevivência',   baseAttr: 'wis' },
+    { key: 'religion',        label: 'Religião',      baseAttr: 'wis', trainedOnly: true },
+    { key: 'survival',        label: 'Sobrevivência', baseAttr: 'wis' },
 
-    { key: 'will',            label: 'Vontade',         baseAttr: 'wis', tags: ['save'] }
+    { key: 'will',            label: 'Vontade',       baseAttr: 'wis', tags: ['save'] }
   ],
 
   // =========================
@@ -104,7 +118,6 @@ export const t20Schema = {
       weapon_off: { type: 'weapon', label: 'Arma (Secundária)' }
     },
 
-    // contrato esperado (documentação do formato)
     types: {
       armor: {
         // type: 'light' | 'medium' | 'heavy'
@@ -131,71 +144,122 @@ export const t20Schema = {
   rules: {
     baseDefense: 10,
 
-    // JdA: o atributo já é o bônus. (14 significa +14, não +2)
+    /**
+     * JdA: o atributo já é o bônus direto.
+     */
     attributeBonus: (value) => Number(value) || 0,
 
     halfLevel: (level) => Math.floor((Number(level) || 1) / 2),
 
-    // Bônus de treino por nível (JdA)
+    /**
+     * Bônus de treino por nível (JdA)
+     */
     trainingBonusByLevel: (level) => {
-      const lv = Number(level) || 1;
-      if (lv >= 15) return 6;
-      if (lv >= 7) return 4;
-      return 2;
+      const lv = Number(level) || 1
+      if (lv >= 15) return 6
+      if (lv >= 7) return 4
+      return 2
     },
 
-    // Mantive sua fórmula anterior (pode ajustar depois se quiser)
+    /**
+     * Mantive sua fórmula (pode ajustar depois).
+     */
     carryCapacity: (strBonus) => 10 + 2 * Math.max(0, Number(strBonus) || 0),
 
-    // Penalidade de armadura “ativa” (para UI exibir)
+    /**
+     * ==========================================================
+     * 🔥 NOVO: Resolver de atributo "atual" (base + avanços)
+     * ==========================================================
+     *
+     * Este helper permite que regras usem SEMPRE a mesma origem:
+     *
+     * sheet.attributes.creation.base       -> escolhido na criação
+     * sheet.attributes.advancement.increases -> aumentos permanentes (ex.: poder de classe +1)
+     * sheet.attributes.misc               -> bônus “soltos” (opcional)
+     * sheet.attributes.temp               -> bônus temporários (opcional)
+     *
+     * Além disso, mantém compat com formatos legados:
+     * - ctx.attributes.dex
+     * - ctx.attributes.base.dex
+     */
+    getAttr: (ctx, attrKey) => {
+      const n = (v) => Number(v) || 0
+
+      // ✅ novo modelo (canônico)
+      const creation = ctx?.sheet?.attributes?.creation?.base?.[attrKey]
+      const adv = ctx?.sheet?.attributes?.advancement?.increases?.[attrKey]
+      const misc = ctx?.sheet?.attributes?.misc?.[attrKey]
+      const temp = ctx?.sheet?.attributes?.temp?.[attrKey]
+
+      const hasNew =
+        creation !== undefined || adv !== undefined || misc !== undefined || temp !== undefined
+
+      if (hasNew) {
+        return n(creation) + n(adv) + n(misc) + n(temp)
+      }
+
+      // ♻️ compat legado
+      const legacy1 = ctx?.attributes?.[attrKey]
+      const legacy2 = ctx?.attributes?.base?.[attrKey]
+      return n(legacy1 ?? legacy2 ?? 0)
+    },
+
+    /**
+     * Penalidade de armadura “ativa” (para UI exibir)
+     */
     armorPenalty: (ctx) => {
-      return ctx?.equipment?.armor?.skillPenalty ?? 0;
+      return ctx?.equipment?.armor?.skillPenalty ?? 0
     },
 
-    // Defesa total (JdA)
+    /**
+     * Defesa total (JdA)
+     *
+     * Agora usa getAttr(ctx,'dex') para suportar:
+     * - criação + avanços (+1 por poderes de classe)
+     */
     defenseTotal: (ctx) => {
-      const base = 10;
+      const base = 10
 
-      const armor = ctx?.equipment?.armor ?? null;
-      const shield = ctx?.equipment?.shield ?? null;
+      const armor = ctx?.equipment?.armor ?? null
+      const shield = ctx?.equipment?.shield ?? null
 
-      const armorBonus = armor?.defenseBonus ?? 0;
-      const shieldBonus = shield?.defenseBonus ?? 0;
+      const armorBonus = armor?.defenseBonus ?? 0
+      const shieldBonus = shield?.defenseBonus ?? 0
 
-      // JdA: DEX é bônus direto
       const dexRaw = (ctx?.schema?.rules?.attributeBonus ?? ((v) => Number(v) || 0))(
-        ctx?.attributes?.dex ?? 0
-      );
+        ctx?.schema?.rules?.getAttr?.(ctx, 'dex') ?? 0
+      )
 
-      // cap opcional (se você quiser modelar isso nos itens)
-      const dexCap = armor?.dexCap ?? null;
+      const dexCap = armor?.dexCap ?? null
       const dex = (dexCap === null || dexCap === undefined)
         ? dexRaw
-        : Math.min(dexRaw, dexCap);
+        : Math.min(dexRaw, dexCap)
 
-      const misc = ctx?.bonuses?.defense?.misc ?? 0;
+      const misc = ctx?.bonuses?.defense?.misc ?? 0
 
-      return base + armorBonus + shieldBonus + dex + misc;
+      return base + armorBonus + shieldBonus + dex + misc
     },
 
-    // Decomposição da Defesa (pra UI)
+    /**
+     * Decomposição da Defesa (pra UI)
+     */
     defenseBreakdown: (ctx) => {
-      const armor = ctx?.equipment?.armor ?? null;
-      const shield = ctx?.equipment?.shield ?? null;
+      const armor = ctx?.equipment?.armor ?? null
+      const shield = ctx?.equipment?.shield ?? null
 
-      const armorBonus = armor?.defenseBonus ?? 0;
-      const shieldBonus = shield?.defenseBonus ?? 0;
+      const armorBonus = armor?.defenseBonus ?? 0
+      const shieldBonus = shield?.defenseBonus ?? 0
 
       const dexRaw = (ctx?.schema?.rules?.attributeBonus ?? ((v) => Number(v) || 0))(
-        ctx?.attributes?.dex ?? 0
-      );
+        ctx?.schema?.rules?.getAttr?.(ctx, 'dex') ?? 0
+      )
 
-      const dexCap = armor?.dexCap ?? null;
+      const dexCap = armor?.dexCap ?? null
       const dex = (dexCap === null || dexCap === undefined)
         ? dexRaw
-        : Math.min(dexRaw, dexCap);
+        : Math.min(dexRaw, dexCap)
 
-      const misc = ctx?.bonuses?.defense?.misc ?? 0;
+      const misc = ctx?.bonuses?.defense?.misc ?? 0
 
       return {
         base: 10,
@@ -204,116 +268,110 @@ export const t20Schema = {
         dex,
         misc,
         total: 10 + armorBonus + shieldBonus + dex + misc
-      };
+      }
     },
 
-    // Perícia total (JdA)
-    // fórmula: meia-nível + atributo (direto) + treino (+2/+4/+6) + misc - penalidade
-    // retorna null se trainedOnly e não treinada (pra UI bloquear)
+    /**
+     * Perícia total (JdA)
+     *
+     * fórmula: meia-nível + atributo (direto) + treino (+2/+4/+6) + misc - penalidade
+     * retorna null se trainedOnly e não treinada
+     */
     skillTotal: (ctx, skillKey) => {
-      const schema = ctx?.schema;
-      const skill = schema?.skills?.find(s => s.key === skillKey);
-      if (!skill) return 0;
+      const schema = ctx?.schema
+      const skill = schema?.skills?.find(s => s.key === skillKey)
+      if (!skill) return 0
 
-      const level = Number(ctx?.level) || 1;
-      const trainedSkills = ctx?.trainedSkills ?? [];
-      const isTrained = trainedSkills.includes(skillKey);
+      const level = Number(ctx?.level) || 1
+      const trainedSkills = ctx?.trainedSkills ?? []
+      const isTrained = trainedSkills.includes(skillKey)
 
-      if (skill.trainedOnly && !isTrained) return null;
+      if (skill.trainedOnly && !isTrained) return null
 
-      const halfLevel = schema.rules.halfLevel(level);
+      const halfLevel = schema.rules.halfLevel(level)
 
-      const attrBonus = schema.rules.attributeBonus(
-        ctx?.attributes?.[skill.baseAttr] ?? 0
-      );
+      // ✅ usa o atributo atual via getAttr
+      const rawAttr = schema.rules.getAttr(ctx, skill.baseAttr)
+      const attrBonus = schema.rules.attributeBonus(rawAttr)
 
-      const training = isTrained ? schema.rules.trainingBonusByLevel(level) : 0;
+      const training = isTrained ? schema.rules.trainingBonusByLevel(level) : 0
 
-      const armorPenaltyValue = ctx?.equipment?.armor?.skillPenalty ?? 0;
-      const armorPenalty = skill.armorPenalty ? armorPenaltyValue : 0;
+      const armorPenaltyValue = ctx?.equipment?.armor?.skillPenalty ?? 0
+      const armorPenalty = skill.armorPenalty ? armorPenaltyValue : 0
 
-      // bônus diversos vindos de traits/itens/condições
-      const misc = (ctx?.bonuses?.skills?.[skillKey] ?? 0);
+      const misc = (ctx?.bonuses?.skills?.[skillKey] ?? 0)
 
-      return halfLevel + attrBonus + training + misc - armorPenalty;
+      return halfLevel + attrBonus + training + misc - armorPenalty
     },
 
+    /**
+     * Breakdown detalhado (UI)
+     *
+     * Mantém compat com formatos de training:
+     * - boolean legacy: sheet.training.skills[skillKey] = true/false
+     * - objeto: { trained, misc, attr }
+     */
     skillBreakdown: (ctx, skillKey) => {
-      const schema = ctx?.schema;
-      const skill = schema?.skills?.find(s => s.key === skillKey);
+      const schema = ctx?.schema
+      const skill = schema?.skills?.find(s => s.key === skillKey)
       if (!skill) {
-        return { ok: true, parts: [], total: 0 };
+        return { ok: true, parts: [], total: 0 }
       }
 
-      const level = Number(ctx?.level) || 1;
+      const level = Number(ctx?.level) || 1
 
-      // Treinamento armazenado no personagem
-      const entry =
-        ctx?.training?.skills?.[skillKey] ||
-        ctx?.sheet?.training?.skills?.[skillKey] ||
-        { trained: false, misc: 0, attr: null };
+      // Treinamento armazenado no personagem (novo/legacy)
+      const rawEntry =
+        ctx?.training?.skills?.[skillKey] ??
+        ctx?.sheet?.training?.skills?.[skillKey] ??
+        false
 
-      const isTrained = !!entry.trained;
+      const entry = (typeof rawEntry === 'object' && rawEntry !== null)
+        ? rawEntry
+        : { trained: !!rawEntry, misc: 0, attr: null }
 
-      // trainedOnly
+      const isTrained = !!entry.trained
+
       if (skill.trainedOnly && !isTrained) {
-        return {
-          ok: false,
-          parts: [],
-          total: null
-        };
+        return { ok: false, parts: [], total: null }
       }
 
-      const halfLevel = schema.rules.halfLevel(level);
+      const halfLevel = schema.rules.halfLevel(level)
 
-      // atributo (permite override)
-      const attrKey = entry.attr || skill.baseAttr;
+      // atributo (permite override por entry.attr)
+      const attrKey = entry.attr || skill.baseAttr
 
-      const rawAttr =
-        ctx?.attributes?.base?.[attrKey] ??
-        ctx?.attributes?.[attrKey] ??
-        0;
-
-      const attrMod = schema.rules.attributeBonus(rawAttr);
+      const rawAttr = schema.rules.getAttr(ctx, attrKey)
+      const attrMod = schema.rules.attributeBonus(rawAttr)
 
       const trainingBonus = isTrained
         ? schema.rules.trainingBonusByLevel(level)
-        : 0;
+        : 0
 
-      const armorPenaltyValue =
-        ctx?.equipment?.armor?.skillPenalty ?? 0;
+      const armorPenaltyValue = ctx?.equipment?.armor?.skillPenalty ?? 0
+      const armorPenalty = skill.armorPenalty ? armorPenaltyValue : 0
 
-      const armorPenalty = skill.armorPenalty
-        ? armorPenaltyValue
-        : 0;
-
-      const misc = Number(entry.misc || 0);
+      const misc = Number(entry.misc || 0)
 
       const parts = [
         { key: 'half', label: 'Grad.', value: halfLevel },
         { key: 'attr', label: attrKey.toUpperCase(), value: attrMod },
         { key: 'training', label: 'Treino', value: trainingBonus },
-        { key: 'misc', label: 'Outros', value: misc },
-      ];
+        { key: 'misc', label: 'Outros', value: misc }
+      ]
 
       if (armorPenalty) {
-        parts.push({ key: 'armor', label: 'Armadura', value: -armorPenalty });
+        parts.push({ key: 'armor', label: 'Armadura', value: -armorPenalty })
       }
 
-      const total =
-        halfLevel +
-        attrMod +
-        trainingBonus +
-        misc -
-        armorPenalty;
+      const total = halfLevel + attrMod + trainingBonus + misc - armorPenalty
 
       return {
         ok: true,
         attrKey,
         parts,
         total
-      };
-    },
-
+      }
+    }
   }
-};
+}

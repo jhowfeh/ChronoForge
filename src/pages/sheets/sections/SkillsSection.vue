@@ -13,8 +13,14 @@ const props = defineProps({
 
 /** ========= storage compatível ========= */
 function getTrainingRoot() {
+  // ✅ preferência: sheet.training (modelo novo)
+  if (props.character.sheet) {
+    if (!props.character.sheet.training) props.character.sheet.training = { skills: {}, saves: {} }
+    return props.character.sheet.training
+  }
+
+  // ♻️ fallback legado
   if (props.character.training) return props.character.training
-  if (props.character.sheet?.training) return props.character.sheet.training
   props.character.training = { skills: {}, saves: {} }
   return props.character.training
 }
@@ -34,47 +40,86 @@ function ensureSkillEntry(skillKey) {
 }
 
 /** ========= ctx builder (multi-formato) ========= */
-function buildRulesContext(schema, character) {
+function buildRulesContext(schema, character, derived) {
   const sheet = character?.sheet || {}
   const basics = character?.basics || sheet?.basics || {}
 
+  // ✅ level: inclui progression.level
   const level =
+    Number(character?.progression?.level) ||
     Number(character?.level) ||
     Number(basics?.level) ||
     Number(sheet?.level) ||
     1
 
-  // atributos podem estar em:
-  // - character.attributes.base  (novo)
-  // - character.attributes       (antigo achatado)
-  // - character.sheet.attributes.base
-  const attrs =
-    character?.attributes ??
-    sheet?.attributes ??
-    {}
-
-  // mantém compatível com seu schema.skillBreakdown (ele tenta base e depois direto)
-  const attributes = attrs
-
   const training =
+    character?.sheet?.training ||
     character?.training ||
     sheet?.training ||
     { skills: {}, saves: {} }
 
   const equipment =
+    character?.sheet?.equipment ||
     character?.equipment ||
     sheet?.equipment ||
     {}
 
   const bonuses =
+    character?.sheet?.bonuses ||
     character?.bonuses ||
     sheet?.bonuses ||
+    { defense: { misc: 0 }, skills: {} }
+
+  // ✅ mods (features/itens/condições) vindos do engine
+  const mods = derived?.modifiers || derived?.mods || null
+
+  // =========================
+  // ✅ Atributos: gera mapa "atual"
+  // (creation + advancement + misc + temp + mods.attributes)
+  // =========================
+  const keys = (schema?.attributes || []).map(a => a.key)
+
+  const n = (v) => Number(v) || 0
+
+  // origem (novo modelo)
+  const creationBase = sheet?.attributes?.creation?.base || {}
+  const advInc = sheet?.attributes?.advancement?.increases || {}
+  const misc = sheet?.attributes?.misc || {}
+  const temp = sheet?.attributes?.temp || {}
+
+  // fallback legado
+  const legacyBase =
+    character?.attributes?.base ||
+    sheet?.attributes?.base ||
+    character?.attributes ||
     {}
 
-  return { schema, level, attributes, training, equipment, bonuses, sheet }
+  const attrFinal = {}
+  for (const k of keys) {
+    const fromNew =
+      (k in creationBase) || (k in advInc) || (k in misc) || (k in temp)
+
+    const baseVal = fromNew
+      ? n(creationBase[k]) + n(advInc[k]) + n(misc[k]) + n(temp[k])
+      : n(legacyBase?.[k])
+
+    // se quiser que o breakdown já reflita bônus de features no atributo:
+    const modAttr = n(mods?.attributes?.[k])
+
+    attrFinal[k] = baseVal + modAttr
+  }
+
+  /**
+   * ✅ compat: schema.skillBreakdown antigo tenta:
+   * - ctx.attributes.base[attrKey]
+   * - ctx.attributes[attrKey]
+   */
+  const attributes = { base: attrFinal, ...attrFinal }
+
+  return { schema, level, attributes, training, equipment, bonuses, sheet, mods }
 }
 
-const ctx = computed(() => buildRulesContext(props.schema, props.character))
+const ctx = computed(() => buildRulesContext(props.schema, props.character, props.derived))
 
 /** ========= helpers ========= */
 const attrOptions = computed(() =>

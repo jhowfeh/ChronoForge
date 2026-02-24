@@ -28,31 +28,56 @@ function buildRulesContext(schema, character) {
 const ctx = computed(() => buildRulesContext(props.schema, props.character))
 
 /**
- * Ponte para editar SEM quebrar:
- * - se existir character.attributes.base, usa ele
- * - senão se existir sheet.attributes.base, lê ele
- * - ao setar, sempre grava em character.attributes.base (canônico)
+ * Ponte canônica para editar atributos de criação:
+ * character.sheet.attributes.creation.base
+ *
+ * (Não use mais character.attributes.base; mantenha só como fallback de migração.)
  */
 const attrBase = computed({
   get() {
-    return (
-      props.character.attributes?.base ||
-      props.character.sheet?.attributes?.base ||
-      {}
-    )
+    // garante estrutura mínima
+    if (!props.character.sheet) props.character.sheet = {}
+    if (!props.character.sheet.attributes) props.character.sheet.attributes = {}
+
+    // se ainda não existir creation (personagem antigo), cria com base legado se houver
+    if (!props.character.sheet.attributes.creation) {
+      const legacy =
+        props.character.attributes?.base ||
+        props.character.sheet.attributes.base || // legado antigo dentro de sheet
+        {}
+
+      props.character.sheet.attributes.creation = {
+        method: props.schema?.defaults?.attributeMethod ?? 'manual',
+        base: { ...legacy },
+        notes: ''
+      }
+    }
+
+    if (!props.character.sheet.attributes.creation.base) {
+      props.character.sheet.attributes.creation.base = {}
+    }
+
+    return props.character.sheet.attributes.creation.base
   },
   set(v) {
-    if (!props.character.attributes) props.character.attributes = {}
-    if (!props.character.attributes.base || typeof props.character.attributes.base !== 'object') {
-      props.character.attributes.base = {}
+    if (!props.character.sheet) props.character.sheet = {}
+    if (!props.character.sheet.attributes) props.character.sheet.attributes = {}
+    if (!props.character.sheet.attributes.creation) {
+      props.character.sheet.attributes.creation = {
+        method: props.schema?.defaults?.attributeMethod ?? 'manual',
+        base: {},
+        notes: ''
+      }
     }
-    props.character.attributes.base = v
+    props.character.sheet.attributes.creation.base = v || {}
   }
 })
 
 function ensureAttrKey(key) {
   if (!attrBase.value || typeof attrBase.value !== 'object') attrBase.value = {}
-  if (attrBase.value[key] === undefined) attrBase.value[key] = 0
+  if (attrBase.value[key] === undefined || attrBase.value[key] === null) {
+    attrBase.value[key] = props.schema?.defaults?.attributeBase ?? 0
+  }
   return true
 }
 </script>

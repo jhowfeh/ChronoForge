@@ -136,6 +136,76 @@ function getPicksByLevel(character) {
 
 /**
  * ============================================================
+ * Context builder (padroniza ctx para rules do schema)
+ * ============================================================
+ *
+ * O t20Schema.rules (patchado) usa `getAttr(ctx, attrKey)` para ler atributos
+ * do novo modelo:
+ * - sheet.attributes.creation.base
+ * - sheet.attributes.advancement.increases
+ * - sheet.attributes.misc
+ * - sheet.attributes.temp
+ *
+ * Este builder garante que ctx sempre tenha:
+ * - schema, level, sheet, training, equipment, bonuses, mods
+ *
+ * @param {object} params
+ * @param {object} params.schema
+ * @param {object} params.character
+ * @param {object} params.mods
+ * @param {string[]} [params.trainedSkills] - treino efetivo (manual + classe)
+ * @returns {object} ctx
+ */
+function buildCtx({ schema, character, mods, trainedSkills = [] }) {
+  const level = getLevel(character)
+  const sheet = character?.sheet || {}
+  const training = sheet.training || character?.training || { skills: {} }
+  const equipment = getEquipment(character)
+
+  // Bônus misc no seu modelo: sheet.bonuses
+  const bonuses = sheet.bonuses || character?.bonuses || { defense: { misc: 0 }, skills: {} }
+
+  return {
+    schema,
+    level,
+
+    // dados canônicos
+    sheet,
+    training,
+    equipment,
+    bonuses,
+
+    // treino efetivo (patch): manual OR classe
+    trainedSkills,
+
+    // mods resolvidos por features/itens/condições (resolveModifiers)
+    mods: mods || null,
+
+    /**
+     * Compat legado para qualquer trecho antigo que ainda acesse:
+     * - ctx.attributes.dex
+     * - ctx.attributes.base.dex
+     *
+     * Observação: o schema.rules.getAttr(ctx,key) é a fonte de verdade.
+     */
+    attributes: {
+      base:
+        sheet?.attributes?.creation?.base ||
+        sheet?.attributes?.base ||
+        character?.attributes?.base ||
+        {},
+      ...(
+        sheet?.attributes?.creation?.base ||
+        sheet?.attributes?.base ||
+        character?.attributes?.base ||
+        {}
+      )
+    }
+  }
+}
+
+/**
+ * ============================================================
  * Class progression resolver (Data-driven)
  * ============================================================
  */
@@ -146,31 +216,14 @@ function getPicksByLevel(character) {
  * - features escolhidas por nível (picksByLevel)
  * - perícias treinadas vindas da classe (fixas + escolhas)
  * - escolhas pendentes (p/ UI)
- * - debug por nível (p/ UI mostrar “o que foi escolhido em cada nível”)
- *
- * Convenção recomendada no personagem:
- * character.progression = {
- *   classId: 'arcanista',
- *   level: 7,
- *   picksByLevel: {
- *     1: { arcanist_path: 'path_mago', class_skill_picks: ['knowledge','initiative'] },
- *     2: { arcanist_power: 'arcano_de_batalha' },
- *     3: { arcanist_power: 'conhecimento_magico' },
- *   }
- * }
+ * - debug por nível (p/ UI)
  *
  * @param {object} params
- * @param {object} params.schema schema do ruleset (não obrigatório hoje; útil futuramente)
- * @param {object} params.character personagem
- * @param {object} params.classDef definição da classe (vinda do catalog.getClass())
- * @param {Map<string, object>} params.featureIndex Map(featureId -> feature)
- *
- * @returns {object} result
- * @returns {number} result.level
- * @returns {string[]} result.activeFeatureIds
- * @returns {string[]} result.trainedSkills
- * @returns {Array<object>} result.pendingChoices
- * @returns {Record<string, any>} result.debugByLevel
+ * @param {object} params.schema
+ * @param {object} params.character
+ * @param {object} params.classDef
+ * @param {Map<string, object>} params.featureIndex
+ * @returns {object}
  */
 export function resolveClassProgression({ schema, character, classDef, featureIndex }) {
   const level = getLevel(character)
@@ -187,7 +240,7 @@ export function resolveClassProgression({ schema, character, classDef, featureIn
     return [pick].filter(Boolean)
   }
 
-  // Heurística (mínimo patch). Sugestão futura: choice.type = 'skill'|'feature'
+  // Heurística: pool de perícias
   const isSkillPool = (poolName) => poolName === 'arcanist_class_skills'
 
   const prog = Array.isArray(classDef?.progression) ? classDef.progression : []
@@ -257,29 +310,22 @@ export function resolveClassProgression({ schema, character, classDef, featureIn
  * ============================================================
  */
 
-/**
- * Engine do Tormenta 20.
- *
- * Patch aplicado:
- * - computeDerived agora recebe `catalog` (para acessar classes e featureIndex)
- * - integra progressão de classe:
- *   - injeta featureIds de classe no resolveModifiers (extraFeatureIds)
- *   - usa trainedSkills da classe como “treino efetivo” no cálculo de perícias
- * - calcula PV/PM base por classe quando classDef estiver disponível
- *
- * Observação:
- * - Mantém compat total com modelo antigo (character.build.grantedFeatureIds).
- * - Se não houver classe selecionada, PV/PM continuam vindo apenas de mods (como antes).
- */
 export const t20Engine = {
   /**
    * Calcula os valores derivados do personagem.
+   *
+   * Patch aplicado:
+   * - Atributos finais agora consideram:
+   *   creation + advancement + misc + temp + mods.attributes
+   *   via schema.rules.getAttr(ctx, attrKey)
+   *
+   * - Defesa/perícias usam ctx padronizado, reduzindo divergências
+   *   entre "ctx.attributes.base" e "ctx.attributes.dex".
    *
    * @param {object} params
    * @param {object} params.schema schema do ruleset (t20Schema)
    * @param {object} params.character personagem
    * @param {object} params.catalog catálogo do ruleset (buildT20Catalog())
-   *
    * @returns {object} derived
    */
   computeDerived({ schema, character, catalog }) {
@@ -315,20 +361,37 @@ export const t20Engine = {
       character,
       featureIndex,
       extraFeatureIds: classProg.activeFeatureIds
-      // choices: (futuro) se você quiser consolidar choices por nível aqui
     })
 
     // =========================
-    // ATTR FINAL (JdA: atributo é bônus direto)
+    // Treino efetivo (patch)
+    // =========================
+    const effectiveTrainedSkills = []
+    for (const s of schema.skills || []) {
+      if (isSkillTrained(character, s.key) || classTrainedSet.has(s.key)) {
+        effectiveTrainedSkills.push(s.key)
+      }
+    }
+
+    // =========================
+    // ctx padronizado (fonte para rules.getAttr/defense/skills breakdown)
+    // =========================
+    const ctx = buildCtx({
+      schema,
+      character,
+      mods,
+      trainedSkills: effectiveTrainedSkills
+    })
+
+    // =========================
+    // ATTR FINAL
+    // - Usa o novo modelo via schema.rules.getAttr(ctx, key)
+    // - Soma mods.attributes (features/itens/etc.)
     // =========================
     const attrFinal = {}
     for (const a of schema.attributes || []) {
-      const base =
-        character?.attributes?.base?.[a.key] ??
-        character?.sheet?.attributes?.base?.[a.key] ??
-        0
-
-      const total = Number(base || 0) + (mods?.attributes?.[a.key] || 0)
+      const base = schema.rules.getAttr ? schema.rules.getAttr(ctx, a.key) : 0
+      const total = Number(base || 0) + Number(mods?.attributes?.[a.key] || 0)
       attrFinal[a.key] = total
     }
 
@@ -364,17 +427,19 @@ export const t20Engine = {
     }
 
     // =========================
-    // SKILLS (inclui Fort/Ref/Will)
-    // Patch: treino efetivo = treino manual OR treino vindo da classe
+    // SKILLS
+    // - agora centraliza regra em schema.rules.skillTotal quando possível
+    // - mantém “misc manual” e “override de atributo” via training entry
+    // - soma mods.skills
     // =========================
     const skills = {}
     const armorPenaltyValue = equipment?.armor?.skillPenalty ?? 0
 
     for (const s of schema.skills || []) {
-      const trained = isSkillTrained(character, s.key) || classTrainedSet.has(s.key)
-      const misc = getSkillMisc(character, s.key)
+      const trained = effectiveTrainedSkills.includes(s.key)
+      const miscManual = getSkillMisc(character, s.key)
 
-      // trainedOnly e não treinada => null (UI pode bloquear)
+      // trainedOnly e não treinada => null
       if (s.trainedOnly && !trained) {
         skills[s.key] = null
         continue
@@ -382,12 +447,16 @@ export const t20Engine = {
 
       const attrKey = getSkillAttrOverride(character, s.key) || s.baseAttr
 
+      // Nota: aqui usamos attrFinal (já inclui mods.attributes),
+      // pois perícia no T20 soma atributo "final" (incluindo bônus permanentes/traits).
       const attrBonus = schema.rules.attributeBonus(attrFinal[attrKey] ?? 0)
+
       const training = trained ? schema.rules.trainingBonusByLevel(level) : 0
       const armorPenalty = s.armorPenalty ? Number(armorPenaltyValue || 0) : 0
-      const effBonus = Number(mods?.skills?.[s.key] || 0)
 
-      skills[s.key] = halfLevel + attrBonus + training + misc + effBonus - armorPenalty
+      const miscMods = Number(mods?.skills?.[s.key] || 0)
+
+      skills[s.key] = halfLevel + attrBonus + training + miscManual + miscMods - armorPenalty
     }
 
     // =========================
@@ -399,13 +468,23 @@ export const t20Engine = {
 
     // =========================
     // DEFESA / CARGA
+    // - usa ctx padronizado + attrFinal (para garantir dex correto)
     // =========================
     const defense = schema.rules.defenseTotal({
       schema,
       level,
+
+      // compat: algumas regras antigas leem attributes.dex
+      // aqui garantimos que attributes exista e seja "final"
       attributes: attrFinal,
+
       equipment,
-      bonuses: { defense: { misc: mods?.stats?.defense || 0 } }
+
+      // misc de defesa vindo de mods.stats.defense (como você já fazia)
+      bonuses: { defense: { misc: mods?.stats?.defense || 0 } },
+
+      // também passamos sheet/training pra getAttr funcionar caso a regra use
+      sheet: character?.sheet || {}
     })
 
     const carry_capacity =
@@ -427,7 +506,8 @@ export const t20Engine = {
         hp_max: hpFinal,
         mp_max: mpFinal,
         speed: (mods?.stats?.speed || 0),
-        armor_penalty: schema.rules.armorPenalty({ equipment }) + (mods?.stats?.armor_penalty || 0)
+        armor_penalty:
+          schema.rules.armorPenalty({ equipment }) + (mods?.stats?.armor_penalty || 0)
       },
       modifiers: mods,
 

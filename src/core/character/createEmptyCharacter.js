@@ -19,38 +19,125 @@ function arrayToMap(keys, initValue) {
 }
 
 /**
- * Cria o esqueleto padrão de um personagem para um ruleset.
+ * ===============================
+ * 🧠 Atributos — Modelo Canônico
+ * ===============================
  *
- * ✅ Compatível com:
- * - Modelo antigo (features): character.build.grantedFeatureIds + character.build.choices
- * - Modelo novo (classes por nível): character.progression.classId + picksByLevel
- *   (usado pelo resolveClassProgression + engine t20 patchado)
+ * Estrutura adotada:
  *
- * Observações de design:
- * - “sheet.*” é um namespace para dados “do personagem” editáveis (atributos base, training, equipamento etc.)
- * - “build.*” continua existindo para manter compat com seu resolver de features (raça/origem/etc.)
- * - “progression.picksByLevel” guarda as escolhas por nível (histórico), sem precisar duplicar em training/featureIds.
+ * sheet.attributes = {
+ *   creation: {
+ *     method: 'manual'|'pointBuy'|'array'|'roll',
+ *     base: { str: 0, dex: 0, ... },
+ *     notes: ''
+ *   },
+ *   advancement: {
+ *     increases: { str: 0, dex: 0, ... },
+ *     byLevel: {
+ *       2: { str: 1 },
+ *       5: { dex: 1 }
+ *     }
+ *   },
+ *   misc: { str: 0, dex: 0, ... },
+ *   temp: { str: 0, dex: 0, ... }
+ * }
+ *
+ * Valor final de atributo =
+ *   creation.base
+ * + advancement.increases
+ * + misc
+ * + temp
+ * (+ modifiers vindos do engine)
+ */
+
+/**
+ * Retorna o valor atual de um atributo.
+ *
+ * @param {object} character
+ * @param {string} attrKey
+ * @param {object} schema
+ * @param {object} [mods] - modificadores resolvidos pelo engine (opcional)
+ * @returns {number}
+ */
+export function getAttributeCurrent(character, attrKey, schema, mods = null) {
+  const attributeKeys = (schema?.attributes ?? []).map(a => a.key)
+
+  const attrs = character?.sheet?.attributes ?? {}
+
+  const creation = attrs.creation?.base ?? arrayToMap(attributeKeys, 0)
+  const inc = attrs.advancement?.increases ?? arrayToMap(attributeKeys, 0)
+  const misc = attrs.misc ?? arrayToMap(attributeKeys, 0)
+  const temp = attrs.temp ?? arrayToMap(attributeKeys, 0)
+
+  const baseValue =
+    (Number(creation?.[attrKey]) || 0) +
+    (Number(inc?.[attrKey]) || 0) +
+    (Number(misc?.[attrKey]) || 0) +
+    (Number(temp?.[attrKey]) || 0)
+
+  const modValue = Number(mods?.attributes?.[attrKey] || 0)
+
+  return baseValue + modValue
+}
+
+/**
+ * Aplica aumento permanente de atributo (ex: poder de classe).
+ *
+ * @param {object} character
+ * @param {string} attrKey
+ * @param {number} amount
+ */
+export function applyAttributeIncrease(character, attrKey, amount = 1) {
+  const attrs = character?.sheet?.attributes
+  if (!attrs) return
+
+  if (!attrs.advancement) {
+    attrs.advancement = { increases: {}, byLevel: {} }
+  }
+
+  if (!attrs.advancement.increases[attrKey]) {
+    attrs.advancement.increases[attrKey] = 0
+  }
+
+  attrs.advancement.increases[attrKey] += amount
+
+  const level = Number(character?.progression?.level || 1)
+
+  if (!attrs.advancement.byLevel[level]) {
+    attrs.advancement.byLevel[level] = {}
+  }
+
+  if (!attrs.advancement.byLevel[level][attrKey]) {
+    attrs.advancement.byLevel[level][attrKey] = 0
+  }
+
+  attrs.advancement.byLevel[level][attrKey] += amount
+}
+
+/**
+ * ===============================
+ * 🎭 Criação do Personagem
+ * ===============================
+ *
+ * Compatível com:
+ * - Modelo antigo (build.grantedFeatureIds)
+ * - Modelo novo (progression.classId + picksByLevel)
  *
  * @param {object} [params]
- * @param {string} [params.systemId='t20'] - id do ruleset (ex.: 't20')
- * @returns {object} character
+ * @param {string} [params.systemId='t20']
+ * @returns {object}
  */
 export function createEmptyCharacter({ systemId = 't20' } = {}) {
-  /**
-   * ⚠️ IMPORTANTE:
-   * Dependendo do seu registry, getRuleset(systemId) pode retornar:
-   * - o schema direto, OU
-   * - um objeto { schema, catalog, engine }
-   *
-   * Aqui tratamos os dois casos.
-   */
   const ruleset = getRuleset(systemId)
-  if (!ruleset) throw new Error(`Ruleset "${systemId}" não encontrado no registry.`)
+  if (!ruleset) {
+    throw new Error(`Ruleset "${systemId}" não encontrado no registry.`)
+  }
 
   const schema = ruleset.schema ?? ruleset
-  if (!schema?.id) throw new Error(`Ruleset "${systemId}" inválido: schema não encontrado.`)
+  if (!schema?.id) {
+    throw new Error(`Ruleset "${systemId}" inválido: schema não encontrado.`)
+  }
 
-  // Defaults do schema (T20 JdA: atributos como bônus direto, default costuma ser 0)
   const defaultAttr = schema.defaults?.attributeBase ?? 0
 
   const attributeKeys = (schema.attributes ?? []).map(a => a.key)
@@ -60,18 +147,12 @@ export function createEmptyCharacter({ systemId = 't20' } = {}) {
     ? Object.keys(schema.equipmentModel.slots)
     : []
 
-  // (opcional) cache de stats derivados — pode remover se não usar
   const derivedStatKeys = (schema.stats ?? []).map(s => s.key)
 
-  const characterId = uid()
-
   return {
-    id: characterId,
+    id: uid(),
     systemId: schema.id,
 
-    /**
-     * Meta “do app” (não necessariamente regras do sistema)
-     */
     meta: {
       name: '',
       player: '',
@@ -79,76 +160,38 @@ export function createEmptyCharacter({ systemId = 't20' } = {}) {
       description: ''
     },
 
-    /**
-     * Progressão / Identidade (modelo NOVO)
-     *
-     * - classId: classe principal selecionada (compat com engine patchado)
-     * - picksByLevel: histórico de escolhas por nível (ex.: poder escolhido no 2º nível)
-     *
-     * Campos mantidos por compat:
-     * - classes: array (se você quiser multiclass no futuro)
-     */
     progression: {
       level: 1,
       experience: 0,
 
-      // ✅ modelo novo: 1 classe principal (por enquanto)
       classId: null,
-
-      // (futuro) multiclass / histórico de classes
       classes: [],
 
-      // ids principais do personagem (header)
       deityId: null,
       raceId: null,
       originId: null,
 
-      // escolha por nível (para “refletir na ficha o que foi escolhido por nível”)
-      // ex: { 1: { arcanist_path: 'path_mago', class_skill_picks: ['knowledge','initiative'] }, ... }
       picksByLevel: {},
 
       size: 'medium'
     },
 
-    /**
-     * Dados “editáveis” da ficha (modelo canonical recomendado)
-     */
     sheet: {
       attributes: {
-        // ✅ o que a pessoa escolheu na criação
         creation: {
-          method: schema.defaults?.attributeMethod ?? 'manual', // 'pointBuy'|'array'|'roll'|'manual'
-          base: arrayToMap(attributeKeys, defaultAttr),         // valores escolhidos na criação
-          notes: ''                                             // opcional
+          method: schema.defaults?.attributeMethod ?? 'manual',
+          base: arrayToMap(attributeKeys, defaultAttr),
+          notes: ''
         },
-
-        // ✅ aumentos permanentes ao longo dos níveis (poder de classe, etc.)
         advancement: {
-          // soma “global” por atributo (fácil de calcular)
           increases: arrayToMap(attributeKeys, 0),
-
-          // histórico por nível (opcional, mas MUITO útil)
-          byLevel: {} // ex: { 2: { str: 1 }, 5: { dex: 1 } }
+          byLevel: {}
         },
-
-        // ✅ bônus/penalidades fora do fluxo de feature (opcional)
         misc: arrayToMap(attributeKeys, 0),
-
-        // ✅ temporários (buff/debuff)
-        temp: arrayToMap(attributeKeys, 0),
-
-        // (opcional) cache — você pode nem persistir isso se preferir
-        // current: arrayToMap(attributeKeys, defaultAttr)
+        temp: arrayToMap(attributeKeys, 0)
       },
 
       training: {
-        /**
-         * Treinamento por perícia.
-         *
-         * Você já suporta formatos legacy (boolean ou objeto) no engine.
-         * Aqui começamos simples com boolean, mas você pode migrar
-         * para objeto { trained, misc, attr } conforme necessário.
-         */
         skills: arrayToMap(skillKeys, false)
       },
 
@@ -161,25 +204,19 @@ export function createEmptyCharacter({ systemId = 't20' } = {}) {
 
       attacks: [],
 
-      // placeholder futuro (magias etc.)
       spellcasting: {
         keyAttribute: null,
         spells: []
       },
 
-      // bônus misc (se você usar no UI; o engine atual usa mods.*)
       bonuses: {
         defense: { misc: 0 },
         skills: {}
       },
 
-      // cache opcional
       derived: arrayToMap(derivedStatKeys, null)
     },
 
-    /**
-     * Proficiências genéricas (você pode passar a preencher por classe/feature depois)
-     */
     proficiencies: {
       weapons: [],
       armors: [],
@@ -193,13 +230,6 @@ export function createEmptyCharacter({ systemId = 't20' } = {}) {
       items: []
     },
 
-    /**
-     * Modelo ANTIGO de build (mantido para compat com:
-     * - resolveModifiers() que lê character.build.grantedFeatureIds e character.build.choices
-     *
-     * Patch aplicado:
-     * - mantém intacto, porque o engine patchado injeta features de classe via extraFeatureIds.
-     */
     build: {
       grantedFeatureIds: {
         race: [],
@@ -209,12 +239,6 @@ export function createEmptyCharacter({ systemId = 't20' } = {}) {
         items: [],
         misc: []
       },
-
-      /**
-       * choices consolidados (por featureId, slotKey etc.)
-       * - você pode continuar usando isso para choices de feats e,
-       *   no futuro, também salvar choices de poderes escolhidos por nível.
-       */
       choices: {}
     }
   }
