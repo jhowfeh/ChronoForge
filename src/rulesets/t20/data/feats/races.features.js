@@ -1,5 +1,5 @@
 // src/modules/CharSheetT20/services/features/racial.js
-import { makeFeature, FeatureKind } from './feats/_schema'
+import { makeFeature, FeatureKind } from './_schema'
 
 export const racialFeatures = [
   makeFeature({

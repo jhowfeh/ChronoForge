@@ -11,7 +11,7 @@ import { deities } from './data/deities.list'
 import { racialFeatures } from './data/races.features'
 import { races } from './data/races.list'
 
-import { classesFeatures } from './data/classes.features'
+import { classesFeatures } from './data/feats/classes.features'
 import { classes } from './data/classes.list'
 
 // src/rulesets/t20/catalog.js

@@ -1,4 +1,4 @@
-import { makeFeature, FeatureKind } from './feats/_schema'
+import { makeFeature, FeatureKind } from './_schema'
 
 export const divineFeatures = [
   // =========================
