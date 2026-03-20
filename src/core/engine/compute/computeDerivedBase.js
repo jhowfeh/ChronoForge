@@ -35,6 +35,7 @@ export function getActiveFeatureIds(character, extraFeatureIds = []) {
  * Extensões adicionadas (patch):
  * - `extraFeatureIds`: permite injetar features vindas de progressão (ex.: classe por nível)
  * - `choices`: permite sobrescrever/fornecer choices consolidados (ex.: choices por nível)
+ * - `schema.engine.createEffectHandlers()`: permite ruleset sobrescrever handlers de efeitos
  *
  * @param {object} params
  * @param {object} params.schema schema do ruleset
@@ -45,9 +46,19 @@ export function getActiveFeatureIds(character, extraFeatureIds = []) {
  *
  * @returns {{ mods: object, activeFeatureIds: string[] }}
  */
-export function resolveModifiers({ schema, character, featureIndex, extraFeatureIds = [], choices = null }) {
+export function resolveModifiers({
+  schema,
+  character,
+  catalog,
+  featureIndex,
+  extraFeatureIds = [],
+  choices = null
+}) {
   const resolvedChoices = choices ?? character?.build?.choices ?? {}
-  const mods = createEmptyModifiers(schema)
+  const mods = createEmptyModifiers(schema, catalog)
+
+  // ✅ hooks do ruleset (opcional)
+  const handlers = schema?.engine?.createEffectHandlers?.()
 
   const visited = new Set()
   const stack = [...getActiveFeatureIds(character, extraFeatureIds)]
@@ -60,8 +71,8 @@ export function resolveModifiers({ schema, character, featureIndex, extraFeature
     const feat = featureIndex?.get?.(id)
     if (!feat) continue
 
-    // ✅ aplica efeitos da feature no acumulador de mods
-    applyFeatureEffects({ schema, feature: feat, choices: resolvedChoices, mods })
+    // ✅ aplica efeitos da feature no acumulador de mods (com handlers do ruleset, se houver)
+    applyFeatureEffects({ schema, feature: feat, choices: resolvedChoices, mods, handlers })
 
     // ✅ processa “grants” emitidos por efeitos (feature concede outras)
     const grants = mods?.grants?.featureIds?.splice?.(0) || []

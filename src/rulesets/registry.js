@@ -1,5 +1,5 @@
 import { t20Schema } from './t20/schema'
-import { t20Engine } from './t20/engine'
+import { t20Engine } from './t20/engine/engine'
 import { buildT20Catalog } from './t20/catalog'
 
 const rulesets = {

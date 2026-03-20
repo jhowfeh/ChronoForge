@@ -19,7 +19,7 @@
         "primeicons": "^7.0.0",
         "primevue": "^4.5.2",
         "prismjs": "^1.30.0",
-        "quill": "^2.0.3",
+        "quill": "^2.0.2",
         "sql-formatter": "^15.6.12",
         "tailwindcss-primeui": "^0.6.1",
         "uuid": "^13.0.0",
@@ -41,6 +41,6 @@
         "sass": "^1.55.0",
         "tailwindcss": "^4.1.18",
         "unplugin-vue-components": "^0.27.3",
-        "vite": "^5.3.1"
+        "vite": "^7.3.1"
     }
 }

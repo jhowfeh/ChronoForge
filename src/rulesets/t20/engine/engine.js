@@ -359,6 +359,7 @@ export const t20Engine = {
     const { mods, activeFeatureIds } = resolveModifiers({
       schema,
       character,
+      catalog,
       featureIndex,
       extraFeatureIds: classProg.activeFeatureIds
     })
@@ -367,7 +368,8 @@ export const t20Engine = {
     // Treino efetivo (patch)
     // =========================
     const effectiveTrainedSkills = []
-    for (const s of schema.skills || []) {
+    const skillsDef = Array.isArray(catalog?.skills) ? catalog.skills : []
+    for (const s of skillsDef || []) {
       if (isSkillTrained(character, s.key) || classTrainedSet.has(s.key)) {
         effectiveTrainedSkills.push(s.key)
       }
@@ -434,8 +436,8 @@ export const t20Engine = {
     // =========================
     const skills = {}
     const armorPenaltyValue = equipment?.armor?.skillPenalty ?? 0
-
-    for (const s of schema.skills || []) {
+    
+    for (const s of skillsDef || []) {
       const trained = effectiveTrainedSkills.includes(s.key)
       const miscManual = getSkillMisc(character, s.key)
 
