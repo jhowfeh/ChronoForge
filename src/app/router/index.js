@@ -1,9 +1,7 @@
 import AppLayout from '@/app/layout/AppLayout.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 
-import CharacterSheet from '@/pages/sheets/CharacterSheet.vue'
-import OriginsPage from '@/pages/database/OriginsPage.vue'
-import FeaturesPage from '@/pages/database/FeaturesPage.vue'
+import Dashboard from '../views/Dashboard.vue';
 
 const router = createRouter({
     history: createWebHistory(),
@@ -14,22 +12,9 @@ const router = createRouter({
             children:  [
                 {
                     path: '', 
-                    redirect: '/sheet/active' },
-                {
-                    path: 'sheet/:id', 
-                    name: 'sheet', 
-                    component: CharacterSheet 
+                    name: 'dashboard', 
+                    component: Dashboard
                 },
-                {
-                    path: 'database/origins', 
-                    name: 'db-origins', 
-                    component: OriginsPage 
-                },
-                {
-                    path: 'database/features', 
-                    name: 'db-features', 
-                    component: FeaturesPage 
-                }
             ]
         },
         {
