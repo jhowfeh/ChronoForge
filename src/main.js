@@ -32,4 +32,8 @@ import { useLayout } from '@/app/layout/composables/layout';
 const { loadLayoutConfig } = useLayout();
 loadLayoutConfig();
 
+import { useRulesetSchemaStore } from '@/app/stores/rulesetSchemaStore'
+const schemaStore = useRulesetSchemaStore()
+schemaStore.init()
+
 app.mount('#app');

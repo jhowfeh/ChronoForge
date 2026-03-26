@@ -1,29 +1,41 @@
 <script setup>
-import { ref } from "vue";
+import { ref, reactive  } from "vue";
+
+import { useRulesetSchemaStore } from '@/app/stores/rulesetSchemaStore'
+const rulesetSchemaStore = useRulesetSchemaStore();
+
+import NewCharForm from './components/NewCharForm.vue';
 
 const newSheetVisible = ref(false);
 
-const newSheet = {
-    name: '',
-    player: "",
-    ruleset_id: null,
-    sheet: null
+const character = ref({})
+
+const onAddNewSheetClick = () => {
+    console.log('***Add new sheet***');
+    character.value = {
+        systemId: '',
+        basics: {
+            playerName: '',
+            name: '',
+            description: ''
+        }
+    };
+    newSheetVisible.value = true;
 }
 
-const addNewSheet = () => {
-    console.log('***Add new sheet***');
-    newSheetVisible.value = true;
+function onSaveCharClick(char) {
+  console.log(char)
 }
 </script>
 
 <template>
-    <div class="full-layout card">
+    <div class="full-layout-height full-layout-width card">
         <h1 class="flex justify-between items-center">
             Dashboard
             <Button 
-                icon="pi pi-home" 
+                icon="fa-sharp fa-light fa-file-circle-plus"
                 aria-label="Save"
-                @click="addNewSheet"
+                @click="onAddNewSheetClick"
             />
         </h1>
         <p>Bem-vindo(a) ao ChronoForge! Selecione uma ficha de personagem na barra lateral ou crie uma nova para começar...</p>
@@ -34,17 +46,15 @@ const addNewSheet = () => {
         </div>
     </div>
 
-    <div class="card flex justify-center">
-        <Drawer 
-            v-model:visible="newSheetVisible" 
-            header="Drawer" 
-            class="!w-full md:!w-80 lg:!w-[30rem]"
-        >
-
-        </Drawer>
-    </div>
+    <Drawer 
+        v-model:visible="newSheetVisible" 
+        header="Criar nova ficha" 
+        class="!w-full lg:!w-3/4"
+    >
+        <NewCharForm
+            v-model="character"
+            :systems="rulesetSchemaStore.getSchemaList()"
+            @save="onSaveCharClick"
+        />
+    </Drawer>
 </template>
-
-<script>
-
-</script>
