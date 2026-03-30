@@ -32,8 +32,8 @@ const hasSelectedSystem = computed(() => !!character.value.systemId)
 const canSave = computed(() => {
   return (
     !!character.value.systemId &&
-    !!character.value.basics?.playerName?.trim() &&
-    !!character.value.basics?.name?.trim()
+    !!character.value.playerName?.trim() &&
+    !!character.value.name?.trim()
   )
 })
 
@@ -117,7 +117,7 @@ function handleSave() {
               <div class="col-span-12 md:col-span-6">
                 <label class="block mb-2 font-medium">Nome do Jogador</label>
                 <InputText
-                  v-model="character.basics.playerName"
+                  v-model="character.playerName"
                   placeholder="Digite o nome do jogador"
                   :disabled="!hasSelectedSystem"
                   fluid
@@ -127,7 +127,7 @@ function handleSave() {
               <div class="col-span-12 md:col-span-6">
                 <label class="block mb-2 font-medium">Nome do Personagem</label>
                 <InputText
-                  v-model="character.basics.name"
+                  v-model="character.name"
                   placeholder="Digite o nome do personagem"
                   :disabled="!hasSelectedSystem"
                   fluid
@@ -137,7 +137,7 @@ function handleSave() {
               <div class="col-span-12">
                 <label class="block mb-2 font-medium">Descrição</label>
                 <Textarea
-                  v-model="character.basics.description"
+                  v-model="character.description"
                   rows="8"
                   placeholder="Descreva aparência, personalidade, história ou observações importantes"
                   :disabled="!hasSelectedSystem"

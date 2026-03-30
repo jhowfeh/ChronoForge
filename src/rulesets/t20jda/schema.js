@@ -1,97 +1,146 @@
+import { defineAsyncComponent, markRaw } from 'vue'
+import T20SheetView from './view/SheetView.vue'
 
-export const t20Schema = {
+export default {
   id: 't20',
   label: 'Tormenta 20 (Jogo do Ano)',
 
-  /**
-   * =========================
-   * DEFAULTS DO SISTEMA
-   * =========================
-   * Usado por createEmptyCharacter:
-   * - attributeBase: valor inicial de cada atributo na criação
-   * - attributeMethod: como os atributos foram gerados (info para UI)
-   */
-  defaults: {
-    attributeBase: 0,          // T20 JdA: atributo é bônus direto (começa em 0)
-    attributeMethod: 'manual'  // 'manual' | 'pointBuy' | 'array' | 'roll'
-  },
+  getSheetChar(char){
+    return {
+      // =========================
+      // Campos padrão de identificação e descrição
+      // =========================
+      id            : char.id,
+      systemId      : char.systemId,
 
-  /**
-   * Campos do cabeçalho (sua UI dinâmica)
-   */
-  headerFields: [
-    { key: 'race',   label: 'RAÇA',         type: 'select', source: 'races' },
-    { key: 'origin', label: 'ORIGEM',       type: 'select', source: 'origins' },
-    { key: 'class',  label: 'CLASSE',       type: 'select', source: 'classes' },
-    { key: 'deity',  label: 'DIVINDADE',    type: 'select', source: 'deities' },
-    { key: 'age',    label: 'IDADE',        type: 'number'},
-    { key: 'size',   label: 'TAMANHO',      type: 'text'},
-    { key: 'speed',  label: 'DESLOCAMENTO', type: 'text'}
-  ],
+      name          : char.name,
+      description   : char.description  || '',
+      image         : char.image,
+      
+      // =========================
+      // Header Info
+      // =========================
+      level         : char.level,
+      experience    : char.experience,
+      
+      race          : char.race,
+      origin        : char.origin,
+      class         : char.class,
 
-  // =========================
-  // ATRIBUTOS (JdA: valor já é o bônus)
-  // =========================
-  attributes: [
-    { key: 'str', acronym: 'FOR', label: 'Força' },
-    { key: 'dex', acronym: 'DES', label: 'Destreza' },
-    { key: 'con', acronym: 'CON', label: 'Constituição' },
-    { key: 'int', acronym: 'INT', label: 'Inteligência' },
-    { key: 'wis', acronym: 'SAB', label: 'Sabedoria' },
-    { key: 'cha', acronym: 'CAR', label: 'Carisma' }
-  ],
+      background    : char.background,
+      alignment     : char.alignment,
+      deity         : char.deity,
+      age           : char.age,
+      size          : char.size,
+      speed         : char.speed,
 
-  // =========================
-  // STATS DERIVADOS (labels)
-  // =========================
-  stats: [
-    { key: 'hp_max', label: 'PV Máx' },
-    { key: 'mp_max', label: 'PM Máx' },
-    { key: 'defense', label: 'Defesa' },
-    { key: 'speed', label: 'Deslocamento' },
-    { key: 'carry_capacity', label: 'Limite de Carga' },
-    { key: 'armor_penalty', label: 'Penalidade de Armadura' }
-  ],
+      senses        : char.vision,
 
-  // =========================
-  // GRUPOS / ALIASES
-  // =========================
-  flags: {
-    savesAsSkills: true
-  },
-  skillGroups: {
-    saves: ['fortitude', 'reflexes', 'will']
-  },
+      // =========================
+      // Attrubutes
+      // =========================
+      str           : char.str,
+      dex           : char.dex,
+      con           : char.con,
+      int           : char.int,
+      wis           : char.wis,
+      cha           : char.cha,
 
-  // =========================
-  // MODELO MÍNIMO DE EQUIPAMENTO
-  // =========================
-  equipmentModel: {
-    slots: {
-      armor: { type: 'armor', label: 'Armadura' },
-      shield: { type: 'shield', label: 'Escudo' },
-      weapon_main: { type: 'weapon', label: 'Arma (Principal)' },
-      weapon_off: { type: 'weapon', label: 'Arma (Secundária)' }
-    },
+      // =========================
+      // Skills
+      // =========================
+      acrobatics      : char.acrobatics,
+      animal_handling : char.animal_handling,
+      athletics       : char.athletics,
+      performance     : char.performance,
+      riding          : char.riding,
+      knowledge       : char.knowledge,
+      healing         : char.healing,
+      diplomacy       : char.diplomacy,
+      deception       : char.deception,
+      fortitude       : char.fortitude,
+      stealth         : char.stealth,
+      warfare         : char.warfare,
+      initiative      : char.initiative,
+      intimidation    : char.intimidation,
+      insight         : char.insight,
+      investigation   : char.investigation,
+      gambling        : char.gambling,
+      sleight_of_hand : char.sleight_of_hand,
+      melee           : char.melee,
+      mysticism       : char.mysticism,
+      nobility        : char.nobility,
+      craft           : char.craft,
+      perception      : char.perception,
+      piloting        : char.piloting,
+      ranged          : char.ranged,
+      reflexes        : char.reflexes,
+      religion        : char.religion,
+      survival        : char.survival,
+      will            : char.will,
 
-    types: {
-      armor: {
-        // type: 'light' | 'medium' | 'heavy'
-        // defenseBonus: number
-        // skillPenalty: number  (ex.: 2 representa -2 em perícias com armorPenalty:true)
-        // dexCap: number|null   (cap opcional do bônus de DEX na Defesa)
-        // weight: number
+      // =========================
+      // Advancements
+      // =========================
+      /**
+       * Registro das escolhas de progressão por nível.
+       *
+       * Cada nível contém uma lista de entradas com:
+       * - slotId: qual slot de advancement gerou a escolha
+       * - choiceId: qual opção foi escolhida
+       * - kind/tag: metadados para identificar a origem e o tipo da escolha
+       *
+       * Os slots válidos e suas regras ficam em schema.advancements.
+       * Esta estrutura guarda apenas o resultado das escolhas do personagem.
+       */
+      advancements: {
+        1: [],
+        2: [],
+        3: [],
+        4: [],
+        5: [],
+        6: [],
+        7: [],
+        8: [],
+        9: [],
+        10: [],
+        11: [],
+        12: [],
+        13: [],
+        14: [],
+        15: [],
+        16: [],
+        17: [],
+        18: [],
+        19: [],
+        20: [],
       },
-      shield: {
-        // defenseBonus: number
-        // weight: number
-      },
-      weapon: {
-        // hands: 1|2
-        // weight: number
-        // category, damage, range etc. você adiciona depois
-      }
     }
+  },
+
+  senseOptions: [
+    // { value: 'normal', label: 'Normal' },
+    { value: 'darkvision' , label: 'Visão no Escuro' },
+    { value: 'lowlight'   , label: 'Visão em Baixa Luz' },
+    // { value: 'tremorsense', label: 'Tremorsense' },
+    // { value: 'truesight', label: 'Visão Verdadeira' },
+  ],
+
+  advancements: {
+    powers: [
+      {
+        id: 't20:slot:power',
+        label: 'Poder do Nível',
+        levels: [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
+        pick: 1,
+        sources: [
+          { kind: 'feature', tag: 'classPower' },
+          { kind: 'feature', tag: 'generalPower' },
+          { kind: 'feature', tag: 'racePower' },
+          // { kind: 'feature', tag: 'distinctionPower' },
+        ]
+      }
+    ]
   },
 
   // =========================
@@ -100,11 +149,7 @@ export const t20Schema = {
   rules: {
     baseDefense: 10,
 
-    /**
-     * JdA: o atributo já é o bônus direto.
-     */
     attributeBonus: (value) => Number(value) || 0,
-
     halfLevel: (level) => Math.floor((Number(level) || 1) / 2),
 
     /**
@@ -117,9 +162,7 @@ export const t20Schema = {
       return 2
     },
 
-    /**
-     * Mantive sua fórmula (pode ajustar depois).
-     */
+    
     carryCapacity: (strBonus) => 10 + 2 * Math.max(0, Number(strBonus) || 0),
 
     /**
@@ -168,38 +211,9 @@ export const t20Schema = {
     },
 
     /**
-     * Defesa total (JdA)
-     *
-     * Agora usa getAttr(ctx,'dex') para suportar:
-     * - criação + avanços (+1 por poderes de classe)
+     * Defesa
      */
-    defenseTotal: (ctx) => {
-      const base = 10
-
-      const armor = ctx?.equipment?.armor ?? null
-      const shield = ctx?.equipment?.shield ?? null
-
-      const armorBonus = armor?.defenseBonus ?? 0
-      const shieldBonus = shield?.defenseBonus ?? 0
-
-      const dexRaw = (ctx?.schema?.rules?.attributeBonus ?? ((v) => Number(v) || 0))(
-        ctx?.schema?.rules?.getAttr?.(ctx, 'dex') ?? 0
-      )
-
-      const dexCap = armor?.dexCap ?? null
-      const dex = (dexCap === null || dexCap === undefined)
-        ? dexRaw
-        : Math.min(dexRaw, dexCap)
-
-      const misc = ctx?.bonuses?.defense?.misc ?? 0
-
-      return base + armorBonus + shieldBonus + dex + misc
-    },
-
-    /**
-     * Decomposição da Defesa (pra UI)
-     */
-    defenseBreakdown: (ctx) => {
+    defense: (ctx) => {
       const armor = ctx?.equipment?.armor ?? null
       const shield = ctx?.equipment?.shield ?? null
 
@@ -232,40 +246,6 @@ export const t20Schema = {
      *
      * fórmula: meia-nível + atributo (direto) + treino (+2/+4/+6) + misc - penalidade
      * retorna null se trainedOnly e não treinada
-     */
-    skillTotal: (ctx, skillKey) => {
-      const schema = ctx?.schema
-      const skill = schema?.skills?.find(s => s.key === skillKey)
-      if (!skill) return 0
-
-      const level = Number(ctx?.level) || 1
-      const trainedSkills = ctx?.trainedSkills ?? []
-      const isTrained = trainedSkills.includes(skillKey)
-
-      if (skill.trainedOnly && !isTrained) return null
-
-      const halfLevel = schema.rules.halfLevel(level)
-
-      // ✅ usa o atributo atual via getAttr
-      const rawAttr = schema.rules.getAttr(ctx, skill.baseAttr)
-      const attrBonus = schema.rules.attributeBonus(rawAttr)
-
-      const training = isTrained ? schema.rules.trainingBonusByLevel(level) : 0
-
-      const armorPenaltyValue = ctx?.equipment?.armor?.skillPenalty ?? 0
-      const armorPenalty = skill.armorPenalty ? armorPenaltyValue : 0
-
-      const misc = (ctx?.bonuses?.skills?.[skillKey] ?? 0)
-
-      return halfLevel + attrBonus + training + misc - armorPenalty
-    },
-
-    /**
-     * Breakdown detalhado (UI)
-     *
-     * Mantém compat com formatos de training:
-     * - boolean legacy: sheet.training.skills[skillKey] = true/false
-     * - objeto: { trained, misc, attr }
      */
     skillBreakdown: (ctx, skillKey) => {
       const schema = ctx?.schema
@@ -331,21 +311,9 @@ export const t20Schema = {
     }
   },
 
-  advancement: {
-    slots: [
-      {
-        id: 't20:slot:power',
-        label: 'Poder do Nível',
-        levels: [2,4,6,8,10,12,14,16,18,20],
-        pick: 1,
-        sources: [
-          { kind: 'feature', tag: 'classPower' },
-          { kind: 'feature', tag: 'generalPower' },
-          // futuro:
-          // { kind: 'feature', tag: 'racePower' },
-          // { kind: 'feature', tag: 'distinctionPower' },
-        ]
-      }
-    ]
-  }
+
+  // =========================
+  // UI E COMPONENTES
+  // =========================
+  sheetComponent: markRaw(T20SheetView)
 }

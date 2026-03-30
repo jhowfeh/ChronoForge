@@ -4,7 +4,7 @@ const rulesets = {
     id: 't20jda',
     label: 'Tormenta 20 Jogo do Ano',
     image: 't20jda.png',
-    schema: import('./t20jda/schema.js'),
+    loadSchema: () => import('./t20jda/schema.js'),
   },
   det3Alpha: {
     id: 'det3Alpha',

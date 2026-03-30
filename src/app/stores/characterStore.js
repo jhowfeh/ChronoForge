@@ -19,8 +19,8 @@ export const useCharacterStore = defineStore('Characters', () => {
     }
 
     const character = {
-      id: characterData.id ?? crypto.randomUUID(),
-      ...characterData
+      ...characterData,
+      id: characterData.id?.length ? characterData.id : crypto.randomUUID()
     }
 
     CharacterList.value.push(character)

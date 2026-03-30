@@ -3,59 +3,152 @@ import { ref } from 'vue'
 import { listRulesets } from '@/rulesets/registry'
 
 export const useRulesetSchemaStore = defineStore('RulesetSchema', () => {
-    const SchemaList = ref([])
+  /**
+   * Lista de rulesets disponíveis (metadata).
+   *
+   * Cada item representa um sistema (T20, CoC, etc) e contém:
+   * - id
+   * - label
+   * - image (opcional)
+   * - loadSchema (função lazy que carrega o schema)
+   *
+   * ⚠️ NÃO contém o schema carregado.
+   */
+  const RulesetList = ref([])
 
-    /**
-     * Inicializa a store carregando todos os schemas disponíveis no registry.
-     *
-     * Deve ser chamada no boot da aplicação antes de qualquer acesso aos schemas.
-     *
-     * @function init
-     * @returns {void}
-     *
-     * @example
-     * const store = useRulesetSchemaStore()
-     * store.init()
-     */
-    function init() {
-        SchemaList.value = listRulesets() || []
+  /**
+   * Cache de schemas já carregados.
+   *
+   * Estrutura:
+   * {
+   *   [rulesetId]: schema
+   * }
+   *
+   * Evita múltiplos imports do mesmo schema e melhora performance.
+   */
+  const SchemaCache = ref({})
+
+  /**
+   * Inicializa a store carregando a lista de rulesets disponíveis.
+   *
+   * Deve ser chamada no boot da aplicação.
+   * Apenas carrega metadata (não carrega schemas).
+   *
+   * @function init
+   * @returns {void}
+   *
+   * @example
+   * const store = useRulesetSchemaStore()
+   * store.init()
+   */
+  function init() {
+    RulesetList.value = listRulesets() || []
+  }
+
+  /**
+   * Retorna os dados de um ruleset pelo ID.
+   *
+   * Retorna apenas metadata (não carrega schema).
+   *
+   * @function getRulesetById
+   * @param {string} rulesetId - ID do sistema (ex: "t20jda")
+   * @returns {Object|null} Ruleset encontrado ou null
+   *
+   * @example
+   * const ruleset = store.getRulesetById('t20jda')
+   */
+  function getRulesetById(rulesetId) {
+    if (!rulesetId) return null
+    return RulesetList.value.find(r => r.id === rulesetId) ?? null
+  }
+
+  /**
+   * Carrega (lazy) o schema de um ruleset.
+   *
+   * - Se já estiver no cache, retorna imediatamente
+   * - Caso contrário, executa o import dinâmico
+   * - Armazena no cache para reutilização futura
+   *
+   * @function loadSchemaById
+   * @param {string} rulesetId - ID do sistema
+   * @returns {Promise<Object|null>} Schema carregado
+   *
+   * @example
+   * const schema = await store.loadSchemaById('t20jda')
+   */
+  async function loadSchemaById(rulesetId) {
+    if (!rulesetId) return null
+
+    // 🔹 Retorna do cache se já carregado
+    if (SchemaCache.value[rulesetId]) {
+      return SchemaCache.value[rulesetId]
     }
 
-    /**
-     * Retorna um schema específico com base no ID do ruleset.
-     *
-     * @function getSchemaById
-     * @param {string} rulesetId - Identificador do ruleset (ex: "t20", "coc", "3det")
-     * @returns {Object|null} Schema encontrado ou null caso não exista
-     *
-     * @example
-     * const schema = store.getSchemaById('t20')
-     */
-    function getSchemaById(rulesetId) {
-        if (!rulesetId) return null
+    const ruleset = getRulesetById(rulesetId)
 
-        return SchemaList.value.find(s => s.id === rulesetId) ?? null
+    if (!ruleset?.loadSchema) {
+      console.error('Ruleset has no loadSchema function:', rulesetId)
+      return null
     }
 
-    /**
-     * Retorna a lista completa de schemas disponíveis.
-     *
-     * Usado principalmente para popular dropdowns e seletores de sistema.
-     *
-     * @function getSchemaList
-     * @returns {Array<Object>} Lista de schemas carregados
-     *
-     * @example
-     * const schemas = store.getSchemaList()
-     */
-    function getSchemaList() {
-        return SchemaList.value
-    }
+    try {
+      // 🔹 Import dinâmico do schema
+      const schemaModule = await ruleset.loadSchema()
 
-    return {
-        SchemaList,
-        init,
-        getSchemaById,
-        getSchemaList
+      // 🔹 Compatível com default export ou named export
+      const schema = schemaModule.default ?? schemaModule
+
+      // 🔹 Salva no cache
+      SchemaCache.value[rulesetId] = schema
+
+      return schema
+    } catch (error) {
+      console.error('Failed to load schema:', rulesetId, error)
+      return null
     }
+  }
+
+  /**
+   * Retorna um schema já carregado (cache).
+   *
+   * NÃO realiza import.
+   *
+   * @function getSchemaById
+   * @param {string} rulesetId
+   * @returns {Object|null} Schema do cache ou null
+   *
+   * @example
+   * const schema = store.getSchemaById('t20jda')
+   */
+  function getSchemaById(rulesetId) {
+    if (!rulesetId) return null
+    return SchemaCache.value[rulesetId] ?? null
+  }
+
+  /**
+   * Retorna a lista de rulesets disponíveis.
+   *
+   * Usado para:
+   * - dropdown de seleção de sistema
+   * - listagem de sistemas
+   *
+   * @function getSchemaList
+   * @returns {Array<Object>}
+   *
+   * @example
+   * const list = store.getSchemaList()
+   */
+  function getSchemaList() {
+    return RulesetList.value
+  }
+
+  return {
+    RulesetList,
+    SchemaCache,
+    init,
+    getRulesetById,
+    loadSchemaById,
+    getSchemaById,
+    getSchemaList
+  }
 })
