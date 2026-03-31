@@ -1,9 +1,12 @@
 import { defineAsyncComponent, markRaw } from 'vue'
 import T20SheetView from './view/SheetView.vue'
+import {buildCatalog} from './catalog'
 
 export default {
   id: 't20',
   label: 'Tormenta 20 (Jogo do Ano)',
+
+  catalog: buildCatalog(),
 
   getSheetChar(char){
     return {
@@ -14,70 +17,71 @@ export default {
       systemId      : char.systemId,
 
       name          : char.name,
-      description   : char.description  || '',
-      image         : char.image,
+      playerName    : char.playerName,
+      description   : char.description || '',
+      image         : char.image || '',
       
       // =========================
       // Header Info
       // =========================
-      level         : char.level,
-      experience    : char.experience,
+      level         : char.level || 1,
+      experience    : char.experience || '',
       
-      race          : char.race,
-      origin        : char.origin,
-      class         : char.class,
+      race          : char.race || '',
+      origin        : char.origin || '',
+      class         : char.class || '',
 
-      background    : char.background,
-      alignment     : char.alignment,
-      deity         : char.deity,
-      age           : char.age,
-      size          : char.size,
-      speed         : char.speed,
+      background    : char.background || '',
+      alignment     : char.alignment || '',
+      deity         : char.deity || '',
+      age           : char.age || '',
+      size          : char.size || '',
+      speed         : char.speed || '',
 
-      senses        : char.vision,
+      senses        : char.vision || '',
 
       // =========================
       // Attrubutes
       // =========================
-      str           : char.str,
-      dex           : char.dex,
-      con           : char.con,
-      int           : char.int,
-      wis           : char.wis,
-      cha           : char.cha,
+      str           : char.str || 0,
+      dex           : char.dex || 0,
+      con           : char.con || 0,
+      int           : char.int || 0,
+      wis           : char.wis || 0,
+      cha           : char.cha || 0,
 
       // =========================
       // Skills
       // =========================
-      acrobatics      : char.acrobatics,
-      animal_handling : char.animal_handling,
-      athletics       : char.athletics,
-      performance     : char.performance,
-      riding          : char.riding,
-      knowledge       : char.knowledge,
-      healing         : char.healing,
-      diplomacy       : char.diplomacy,
-      deception       : char.deception,
-      fortitude       : char.fortitude,
-      stealth         : char.stealth,
-      warfare         : char.warfare,
-      initiative      : char.initiative,
-      intimidation    : char.intimidation,
-      insight         : char.insight,
-      investigation   : char.investigation,
-      gambling        : char.gambling,
-      sleight_of_hand : char.sleight_of_hand,
-      melee           : char.melee,
-      mysticism       : char.mysticism,
-      nobility        : char.nobility,
-      craft           : char.craft,
-      perception      : char.perception,
-      piloting        : char.piloting,
-      ranged          : char.ranged,
-      reflexes        : char.reflexes,
-      religion        : char.religion,
-      survival        : char.survival,
-      will            : char.will,
+      acrobatics      : char.acrobatics || false,
+      animal_handling : char.animal_handling || false,
+      athletics       : char.athletics || false,
+      performance     : char.performance || false,
+      riding          : char.riding || false,
+      knowledge       : char.knowledge || false,
+      healing         : char.healing || false,
+      diplomacy       : char.diplomacy || false,
+      deception       : char.deception || false,
+      fortitude       : char.fortitude || false,
+      stealth         : char.stealth || false,
+      warfare         : char.warfare || false,
+      initiative      : char.initiative || false,
+      intimidation    : char.intimidation || false,
+      insight         : char.insight || false,
+      investigation   : char.investigation || false,
+      gambling        : char.gambling || false,
+      sleight_of_hand : char.sleight_of_hand || false,
+      melee           : char.melee || false,
+      mysticism       : char.mysticism || false,
+      nobility        : char.nobility || false,
+      craft           : char.craft || false,
+      perception      : char.perception || false,
+      piloting        : char.piloting || false,
+      ranged          : char.ranged || false,
+      reflexes        : char.reflexes || false,
+      religion        : char.religion || false,
+      survival        : char.survival || false,
+      will            : char.will || false,
 
       // =========================
       // Advancements

@@ -46,6 +46,10 @@ watch(
 const sheetComponent = computed(() => {
   return schema.value?.sheetComponent ?? null
 })
+
+function handleCharacterUpdate(updatedCharacter) {
+  characterStore.updateCharacter(updatedCharacter.id, updatedCharacter)
+}
 </script>
 
 <template>
@@ -62,6 +66,7 @@ const sheetComponent = computed(() => {
     v-else-if="character && schema && sheetComponent"
     :character="character"
     :schema="schema"
+    @update:character="handleCharacterUpdate"
   />
 
   <div v-else>

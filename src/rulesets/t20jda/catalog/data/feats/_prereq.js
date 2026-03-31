@@ -1,0 +1,10 @@
+// Pré-requisitos como descriptors (o engine pode validar depois)
+export const all = (...items) => ({ type: 'ALL', items })
+export const any = (...items) => ({ type: 'ANY', items })
+
+export const attrMin = (attrKey, min) => ({ type: 'ATTR_MIN', attrKey, min })
+export const levelMin = (min) => ({ type: 'LEVEL_MIN', min })
+export const trained = (skillKey) => ({ type: 'SKILL_TRAINED', skillKey })
+export const prof = (category, value) => ({ type: 'PROF', category, value })
+export const has = (featureId) => ({ type: 'HAS_FEATURE', featureId })
+export const castsSpells = () => ({ type: 'CASTS_SPELLS' })

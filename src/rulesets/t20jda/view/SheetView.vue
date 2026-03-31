@@ -1,21 +1,53 @@
 <script setup>
-defineProps({
-  character: { type: Object, required: true },
-  schema: { type: Object, required: true }
+import CharacterHeader from './components/CharacterHeader.vue'
+
+const character = defineModel('character', {
+  type: Object,
+  required: true
 })
+
+defineProps({
+  schema: {
+    type: Object,
+    required: true
+  }
+})
+
+const creatureTypeOptions = [
+  { label: 'Humanoide', value: 'humanoid' },
+  { label: 'Monstro', value: 'monster' }
+]
+
+const raceOptions = [
+  { label: 'Elfo', value: 'elf' },
+  { label: 'Humano', value: 'human' }
+]
+
+const originOptions = [
+  { label: 'Herdeiro', value: 'heir' },
+  { label: 'Acólito', value: 'acolyte' }
+]
+
+const classOptions = [
+  { label: 'Caçador', value: 'hunter' },
+  { label: 'Guerreiro', value: 'fighter' }
+]
 </script>
 
 <template>
   <div class="grid grid-cols-12 gap-4">
-    <div class="col-span-12 card p-4">
-      <h1>{{ character.basics?.name || 'Sem nome' }}</h1>
-      <p>{{ character.basics?.playerName }}</p>
+    <div class="col-span-12">
+      <CharacterHeader
+        v-model="character"
+        :race-options="raceOptions"
+        :origin-options="originOptions"
+        :class-options="classOptions"
+        :creature-type-options="creatureTypeOptions"
+      />
     </div>
 
-    <div class="col-span-12 md:col-span-6 card p-4">
-      <h2>Atributos</h2>
-      <p>Força: {{ character.attributes?.str }}</p>
-      <p>Destreza: {{ character.attributes?.dex }}</p>
+    <div class="col-span-12">
+      Conteúdo da ficha aqui
     </div>
   </div>
 </template>

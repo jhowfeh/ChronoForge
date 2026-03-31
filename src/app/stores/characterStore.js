@@ -2,7 +2,9 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 export const useCharacterStore = defineStore('Characters', () => {
-  const CharacterList = ref([])
+  const CharacterList = ref([
+    {"id":"d10cea2d-a801-46b7-8412-fb5e9e744218","systemId":"t20jda","name":"Nahalen","playerName":"Jonatas","description":"Jovem com cabelos loiros-claros e olhos azul-acinzentados cheios de inquietude. Usa roupas práticas de caçador adornadas com detalhes nobres, e nunca se separa de seu arco élfico Lúmen Telwe.","image":"","level":1,"experience":"","race":"","origin":"","class":"","background":"","alignment":"","deity":"","age":"","size":"","speed":"","senses":"","str":"","dex":"","con":"","int":"","wis":"","cha":"","acrobatics":"","animal_handling":"","athletics":"","performance":"","riding":"","knowledge":"","healing":"","diplomacy":"","deception":"","fortitude":"","stealth":"","warfare":"","initiative":"","intimidation":"","insight":"","investigation":"","gambling":"","sleight_of_hand":"","melee":"","mysticism":"","nobility":"","craft":"","perception":"","piloting":"","ranged":"","reflexes":"","religion":"","survival":"","will":"","advancements":{"1":[],"2":[],"3":[],"4":[],"5":[],"6":[],"7":[],"8":[],"9":[],"10":[],"11":[],"12":[],"13":[],"14":[],"15":[],"16":[],"17":[],"18":[],"19":[],"20":[]}}
+  ])
 
   /**
    * Adiciona um personagem na lista e injeta um ID caso ele não exista.
@@ -25,6 +27,17 @@ export const useCharacterStore = defineStore('Characters', () => {
 
     CharacterList.value.push(character)
     return character
+  }
+
+  function updateCharacter(characterId, newCharacter) {
+    const index = CharacterList.value.findIndex(char => char.id === characterId)
+
+    if (index === -1) {
+      throw new Error(`Personagem com id "${characterId}" não encontrado.`)
+    }
+
+    CharacterList.value[index] = newCharacter
+    return CharacterList.value[index]
   }
 
   /**
